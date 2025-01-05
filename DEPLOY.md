@@ -11,13 +11,13 @@ This document explains how to deploy this React application to GitHub Pages.
 
 ## Automatic Deployment
 
-This project is configured to automatically deploy to GitHub Pages when you push to the `main` branch. The deployment is handled by a GitHub Actions workflow.
+This project is configured to automatically deploy to GitHub Pages when you push to the `master` branch. The deployment is handled by a GitHub Actions workflow.
 
 ### How it works
 
-1. When you push to the `main` branch, the GitHub Actions workflow will:
-   - Set up Node.js
-   - Install dependencies
+1. When you push to the `master` branch, the GitHub Actions workflow will:
+   - Set up Node.js with npm caching
+   - Install dependencies using `npm ci`
    - Build the project
    - Deploy the built files to the `gh-pages` branch
 
@@ -32,7 +32,7 @@ You can also deploy manually from your local machine:
 
 1. Install the required dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 
 2. Run the deploy script:
@@ -62,6 +62,11 @@ If you're setting this up for the first time:
    npm install --save-dev gh-pages
    ```
 
+4. Ensure repository permissions are correct:
+   - Go to Settings > Actions > General
+   - Under "Workflow permissions", select "Read and write permissions"
+   - Save the changes
+
 ## Accessing Your Deployed Site
 
 Once deployed, your site will be available at:
@@ -79,7 +84,13 @@ If your deployment isn't working:
 4. Check that all dependencies are properly installed
 5. Ensure you have the necessary permissions to deploy to the repository
 
+Common Issues:
+- If you get permission errors, check the repository's Actions permissions in Settings
+- If the site is not updating, make sure the GitHub Pages source branch is set to `gh-pages`
+- If builds fail, try running `npm ci` locally first to verify your dependencies
+
 ## Additional Resources
 
 - [GitHub Pages Documentation](https://docs.github.com/en/pages)
-- [Vite Deploy Static Site Guide](https://vitejs.dev/guide/static-deploy.html) 
+- [Vite Deploy Static Site Guide](https://vitejs.dev/guide/static-deploy.html)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions) 
