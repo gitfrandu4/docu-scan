@@ -1,4 +1,4 @@
-# Object Detection using YOLOv8 and Tensorflow.js
+# Object Detection using YOLOv11 and Tensorflow.js
 
 <p align="center">
   <img src="./sample.png" />

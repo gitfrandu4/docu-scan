@@ -20,11 +20,11 @@ const App = () => {
   const canvasRef = useRef(null);
 
   // model configs
-  const modelName = "yolov8n";
+  const modelName = "yolov11n";
 
   useEffect(() => {
     tf.ready().then(async () => {
-      const yolov8 = await tf.loadGraphModel(
+      const yolov11 = await tf.loadGraphModel(
         `${window.location.href}/${modelName}_web_model/model.json`,
         {
           onProgress: (fractions) => {
@@ -34,13 +34,13 @@ const App = () => {
       ); // load model
 
       // warming up model
-      const dummyInput = tf.ones(yolov8.inputs[0].shape);
-      const warmupResults = yolov8.execute(dummyInput);
+      const dummyInput = tf.ones(yolov11.inputs[0].shape);
+      const warmupResults = yolov11.execute(dummyInput);
 
       setLoading({ loading: false, progress: 1 });
       setModel({
-        net: yolov8,
-        inputShape: yolov8.inputs[0].shape,
+        net: yolov11,
+        inputShape: yolov11.inputs[0].shape,
       }); // set model & input shape
 
       tf.dispose([warmupResults, dummyInput]); // cleanup memory
@@ -51,9 +51,9 @@ const App = () => {
     <div className="App">
       {loading.loading && <Loader>Loading model... {(loading.progress * 100).toFixed(2)}%</Loader>}
       <div className="header">
-        <h1>📷 YOLOv8 Live Detection App</h1>
+        <h1>📷 YOLOv11 Live Detection App</h1>
         <p>
-          YOLOv8 live detection application on browser powered by <code>tensorflow.js</code>
+          YOLOv11 live detection application on browser powered by <code>tensorflow.js</code>
         </p>
         <p>
           Serving : <code className="code">{modelName}</code>

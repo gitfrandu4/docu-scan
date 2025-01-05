@@ -41,7 +41,7 @@ const preprocess = (source, modelWidth, modelHeight) => {
 /**
  * Function run inference and do detection from source.
  * @param {HTMLImageElement|HTMLVideoElement} source
- * @param {tf.GraphModel} model loaded YOLOv8 tensorflow.js model
+ * @param {tf.GraphModel} model loaded YOLOv11 tensorflow.js model
  * @param {HTMLCanvasElement} canvasRef canvas reference
  * @param {VoidFunction} callback function to run after detection process
  */
@@ -94,7 +94,7 @@ export const detect = async (source, model, canvasRef, callback = () => {}) => {
 /**
  * Function to detect video from every source.
  * @param {HTMLVideoElement} vidSource video source
- * @param {tf.GraphModel} model loaded YOLOv8 tensorflow.js model
+ * @param {tf.GraphModel} model loaded YOLOv11 tensorflow.js model
  * @param {HTMLCanvasElement} canvasRef canvas reference
  */
 export const detectVideo = (vidSource, model, canvasRef) => {
