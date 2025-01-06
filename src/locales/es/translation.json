@@ -14,5 +14,9 @@
       "open": "Iniciar Cámara",
       "close": "Detener Cámara"
     }
-  }
+  },
+  "backToCamera": "Cambiar a cámara",
+  "newImage": "Subir nueva imagen",
+  "uploadImage": "Subir imagen",
+  "toggleCamera": "Alternar cámara"
 }

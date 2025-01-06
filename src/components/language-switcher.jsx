@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MdLanguage } from "react-icons/md";
 import '../style/language-switcher.css';
 
 const LanguageSwitcher = () => {
@@ -23,7 +24,7 @@ const LanguageSwitcher = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Change language"
       >
-        🌐
+        <MdLanguage />
       </button>
       <div className="language-options">
         {languages.map((lang) => (
