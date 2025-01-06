@@ -55,22 +55,26 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Stop the video stream
+    // Stop the video stream and hide video element
     webcam.close(cameraRef.current);
+    video.style.display = "none";
+    setStreaming("image");
     
     // Convert to blob and create URL
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
-      imageRef.current.src = url;
-      imageRef.current.style.display = "block";
-      video.style.display = "none";
-      setStreaming("image");
+      const img = imageRef.current;
+      img.src = url;
+      img.style.display = "block";
       
-      // Run single detection on the captured frame after a short delay to ensure the image is loaded
-      setTimeout(() => {
-        detect(imageRef.current, model, canvasRef.current, null);
-        setShouldCrop(true); // This will trigger the crop in handleDetection
-      }, 100);
+      // Wait for the image to load before running a single detection
+      img.onload = () => {
+        // Run a single detection and set shouldCrop
+        detect(img, model, canvasRef.current, (boxes_data, ratios, modelWidth, modelHeight) => {
+          setShouldCrop(true);
+          handleDetection(boxes_data, ratios, modelWidth, modelHeight);
+        });
+      };
     }, 'image/jpeg', 0.95);
   };
 
