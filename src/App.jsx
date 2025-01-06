@@ -79,61 +79,30 @@ const App = () => {
         return;
       }
 
-      // The model gives coordinates in 640x640 space after padding
-      // First, we need to unpad these coordinates
-      const modelAspectRatio = modelWidth / modelHeight;
-      const sourceAspectRatio = sourceWidth / sourceHeight;
-      
-      let unpadX1, unpadX2, unpadY1, unpadY2;
-      
-      if (sourceAspectRatio > modelAspectRatio) {
-        // Image was padded vertically
-        const scaleFactor = modelWidth / sourceWidth;
-        const unpadHeight = sourceHeight * scaleFactor;
-        const padding = (modelHeight - unpadHeight) / 2;
-        
-        unpadX1 = x1;
-        unpadX2 = x2;
-        unpadY1 = Math.max(0, y1 - padding);
-        unpadY2 = Math.min(modelHeight - padding, y2 - padding);
-      } else {
-        // Image was padded horizontally
-        const scaleFactor = modelHeight / sourceHeight;
-        const unpadWidth = sourceWidth * scaleFactor;
-        const padding = (modelWidth - unpadWidth) / 2;
-        
-        unpadX1 = Math.max(0, x1 - padding);
-        unpadX2 = Math.min(modelWidth - padding, x2 - padding);
-        unpadY1 = y1;
-        unpadY2 = y2;
-      }
-      
-      console.log('📏 Unpadded model coordinates:', {
-        x1: unpadX1,
-        x2: unpadX2,
-        y1: unpadY1,
-        y2: unpadY2
-      });
+      // Convert coordinates from model space (640x640) to original space
+      const maxSize = Math.max(sourceWidth, sourceHeight);
+      const scale = modelWidth / maxSize;
 
-      // Now scale these coordinates to the source dimensions
-      const scaleX = sourceWidth / modelWidth;
-      const scaleY = sourceHeight / modelHeight;
-      
-      console.log('📊 Scale factors:', { scaleX, scaleY });
-      
-      // Calculate actual coordinates in the original image space
-      const actualX1 = Math.max(0, Math.round(unpadX1 * scaleX));
-      const actualX2 = Math.min(sourceWidth, Math.round(unpadX2 * scaleX));
-      const actualY1 = Math.max(0, Math.round(unpadY1 * scaleY));
-      const actualY2 = Math.min(sourceHeight, Math.round(unpadY2 * scaleY));
-      
+      // Unscale coordinates from 640x640 to original padded size
+      const y1_padded = y1 / scale;
+      const x1_padded = x1 / scale;
+      const y2_padded = y2 / scale;
+      const x2_padded = x2 / scale;
+
+      // Clamp to actual image dimensions (removing padding)
+      const actualX1 = Math.max(0, Math.min(sourceWidth, x1_padded));
+      const actualY1 = Math.max(0, Math.min(sourceHeight, y1_padded));
+      const actualX2 = Math.max(0, Math.min(sourceWidth, x2_padded));
+      const actualY2 = Math.max(0, Math.min(sourceHeight, y2_padded));
+
       console.log('🎯 Final crop coordinates:', {
         x1: actualX1,
-        x2: actualX2,
         y1: actualY1,
-        y2: actualY2
+        x2: actualX2,
+        y2: actualY2,
+        scale
       });
-      
+
       // Create a temporary canvas to crop the image
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
@@ -274,8 +243,8 @@ const App = () => {
               ref={cameraRef}
               style={{ display: "none" }}
               onPlay={() => {
-                if (!croppedImage && !showSplash && !loading.loading) {
-                  // Only start detection when everything is ready
+                if (!croppedImage && !showSplash && !loading.loading && !shouldCrop) {
+                  // Only start detection when everything is ready and we're not in crop mode
                   detectVideo(cameraRef.current, model, canvasRef.current, handleDetection);
                 }
               }}
