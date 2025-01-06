@@ -38,6 +38,7 @@ const App = () => {
       });
     }
 
+    // Comment out the splash timer to debug
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
     }, 3000);

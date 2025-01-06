@@ -4,18 +4,20 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2196F3, #1976D2);
+  background-color: #121212;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  animation: fadeOut 0.5s ease-out 2.5s forwards;
+  overflow: hidden;
 }
 
 .splash-content {
   text-align: center;
   color: white;
-  animation: scaleIn 0.5s ease-out;
+  /* animation: fadeIn 0.5s ease-out; */
+  position: relative;
+  z-index: 2;
 }
 
 .logo-container {
@@ -26,13 +28,37 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1;
+}
+
+.morph-background {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 107, 107, 0.7),
+    rgba(78, 205, 196, 0.7),
+    rgba(69, 183, 209, 0.7)
+  );
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.3;
+  animation: morphShape 4s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .logo {
-  width: 100%;
-  height: 100%;
+  width: 144px;
+  height: 144px;
   object-fit: contain;
-  animation: bounce 1s ease-in-out infinite;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .scan-line {
@@ -41,82 +67,116 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: rgba(255, 255, 255, 0.8);
-  animation: scan 2s linear infinite;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #45b7d1,
+    transparent
+  );
+  animation: scan 2s ease-in-out infinite;
+  z-index: 2;
 }
 
 .app-name {
-  font-size: 2.5rem;
-  margin: 0;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.5s ease-out 0.3s both;
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  background: linear-gradient(45deg, #ffffff, #45b7d1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s ease-in-out infinite;
 }
 
 .tagline {
-  font-size: 1.2rem;
-  margin: 10px 0 0;
-  opacity: 0.9;
-  animation: slideIn 0.5s ease-out 0.6s both;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
 }
 
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { 
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-@keyframes scaleIn {
-  from { 
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to { 
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
-    transform: translateY(20px);
     opacity: 0;
+    transform: translateY(-20px);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes scan {
-  0% { 
+  0% {
     top: 0;
-    opacity: 0;
   }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { 
+  50% {
     top: 100%;
-    opacity: 0;
+  }
+  100% {
+    top: 0;
   }
 }
 
-/* Mobile adjustments */
+@keyframes morphShape {
+  0% {
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  33% {
+    border-radius: 45% 55% 65% 35%;
+    transform: translate(-50%, -50%) scale(1.1) rotate(120deg);
+  }
+  66% {
+    border-radius: 35% 65% 45% 55%;
+    transform: translate(-50%, -50%) scale(0.9) rotate(240deg);
+  }
+  100% {
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
 @media (max-width: 768px) {
   .logo-container {
     width: 120px;
     height: 120px;
   }
 
+  .logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .morph-background {
+    width: 160px;
+    height: 160px;
+  }
+
   .app-name {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .tagline {
