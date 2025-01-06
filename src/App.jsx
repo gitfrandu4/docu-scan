@@ -6,6 +6,7 @@ import './i18n';
 import Loader from "./components/loader";
 import ButtonHandler from "./components/btn-handler";
 import SplashScreen from "./components/splash-screen";
+import ResultPage from "./components/result-page";
 import { detect, detectVideo } from "./utils/detect";
 import "./style/App.css";
 
@@ -13,6 +14,7 @@ const App = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState({ loading: true, progress: 0 });
   const [showSplash, setShowSplash] = useState(true);
+  const [croppedImage, setCroppedImage] = useState(null);
   const [model, setModel] = useState({
     net: null,
     inputShape: [1, 0, 0, 3],
@@ -23,6 +25,139 @@ const App = () => {
   const canvasRef = useRef(null);
 
   const modelName = "yolov11n";
+
+  const handleDetection = (boxes_data, ratios, modelWidth, modelHeight) => {
+    console.group('🎯 Cropping Process');
+    if (boxes_data.length > 0) {
+      // Get the first detection
+      const [y1, x1, y2, x2] = boxes_data.slice(0, 4);
+      console.log('📦 Raw detection box:', { y1, x1, y2, x2 });
+      
+      const sourceElement = imageRef.current.style.display !== "none" ? imageRef.current : cameraRef.current;
+      console.log('🖼️ Source element type:', sourceElement instanceof HTMLVideoElement ? 'video' : 'image');
+      
+      // Check if the source element is ready
+      if (!sourceElement || 
+          (sourceElement instanceof HTMLImageElement && !sourceElement.complete) ||
+          (sourceElement instanceof HTMLVideoElement && sourceElement.readyState < 2)) {
+        console.error('❌ Source element not ready:', {
+          exists: !!sourceElement,
+          complete: sourceElement instanceof HTMLImageElement ? sourceElement.complete : 'N/A',
+          readyState: sourceElement instanceof HTMLVideoElement ? sourceElement.readyState : 'N/A'
+        });
+        console.groupEnd();
+        return;
+      }
+
+      // Get the actual dimensions of the source element
+      const sourceWidth = sourceElement instanceof HTMLVideoElement ? sourceElement.videoWidth : sourceElement.naturalWidth;
+      const sourceHeight = sourceElement instanceof HTMLVideoElement ? sourceElement.videoHeight : sourceElement.naturalHeight;
+
+      console.log('📐 Source dimensions:', { sourceWidth, sourceHeight });
+
+      if (sourceWidth === 0 || sourceHeight === 0) {
+        console.error('❌ Source element has no dimensions');
+        console.groupEnd();
+        return;
+      }
+
+      // The model gives coordinates in 640x640 space after padding
+      // First, we need to unpad these coordinates
+      const modelAspectRatio = modelWidth / modelHeight;
+      const sourceAspectRatio = sourceWidth / sourceHeight;
+      
+      let unpadX1, unpadX2, unpadY1, unpadY2;
+      
+      if (sourceAspectRatio > modelAspectRatio) {
+        // Image was padded vertically
+        const scaleFactor = modelWidth / sourceWidth;
+        const unpadHeight = sourceHeight * scaleFactor;
+        const padding = (modelHeight - unpadHeight) / 2;
+        
+        unpadX1 = x1;
+        unpadX2 = x2;
+        unpadY1 = Math.max(0, y1 - padding);
+        unpadY2 = Math.min(modelHeight - padding, y2 - padding);
+      } else {
+        // Image was padded horizontally
+        const scaleFactor = modelHeight / sourceHeight;
+        const unpadWidth = sourceWidth * scaleFactor;
+        const padding = (modelWidth - unpadWidth) / 2;
+        
+        unpadX1 = Math.max(0, x1 - padding);
+        unpadX2 = Math.min(modelWidth - padding, x2 - padding);
+        unpadY1 = y1;
+        unpadY2 = y2;
+      }
+      
+      console.log('📏 Unpadded model coordinates:', {
+        x1: unpadX1,
+        x2: unpadX2,
+        y1: unpadY1,
+        y2: unpadY2
+      });
+
+      // Now scale these coordinates to the source dimensions
+      const scaleX = sourceWidth / modelWidth;
+      const scaleY = sourceHeight / modelHeight;
+      
+      console.log('📊 Scale factors:', { scaleX, scaleY });
+      
+      // Calculate actual coordinates in the original image space
+      const actualX1 = Math.max(0, Math.round(unpadX1 * scaleX));
+      const actualX2 = Math.min(sourceWidth, Math.round(unpadX2 * scaleX));
+      const actualY1 = Math.max(0, Math.round(unpadY1 * scaleY));
+      const actualY2 = Math.min(sourceHeight, Math.round(unpadY2 * scaleY));
+      
+      console.log('🎯 Final crop coordinates:', {
+        x1: actualX1,
+        x2: actualX2,
+        y1: actualY1,
+        y2: actualY2
+      });
+      
+      // Create a temporary canvas to crop the image
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      // Set canvas size to the crop size
+      const cropWidth = actualX2 - actualX1;
+      const cropHeight = actualY2 - actualY1;
+      
+      console.log('✂️ Crop dimensions:', { cropWidth, cropHeight });
+      
+      if (cropWidth <= 0 || cropHeight <= 0) {
+        console.error('❌ Invalid crop dimensions');
+        console.groupEnd();
+        return;
+      }
+
+      tempCanvas.width = cropWidth;
+      tempCanvas.height = cropHeight;
+      
+      try {
+        console.log('🎨 Drawing crop to canvas...');
+        // Draw the cropped portion
+        tempCtx.drawImage(
+          sourceElement,
+          actualX1, actualY1, // Start at detection box
+          cropWidth, cropHeight, // Width and height of detection
+          0, 0, // Place at 0,0 in destination
+          cropWidth, cropHeight // Same size in destination
+        );
+        
+        // Convert to base64
+        const croppedDataUrl = tempCanvas.toDataURL('image/png');
+        console.log('✅ Successfully created cropped image');
+        setCroppedImage(croppedDataUrl);
+      } catch (error) {
+        console.error('❌ Error cropping image:', error);
+      }
+    } else {
+      console.log('ℹ️ No detections found');
+    }
+    console.groupEnd();
+  };
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -38,7 +173,6 @@ const App = () => {
       });
     }
 
-    // Comment out the splash timer to debug
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
     }, 3000);
@@ -68,6 +202,21 @@ const App = () => {
     return () => clearTimeout(splashTimer);
   }, []);
 
+  if (croppedImage) {
+    return (
+      <ResultPage 
+        croppedImage={croppedImage} 
+        onBack={() => {
+          setCroppedImage(null);
+          // Reset video if it was active
+          if (cameraRef.current && cameraRef.current.style.display !== "none") {
+            detectVideo(cameraRef.current, model, canvasRef.current);
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <>
       {showSplash && <SplashScreen />}
@@ -83,13 +232,13 @@ const App = () => {
               <img
                 src="#"
                 ref={imageRef}
-                onLoad={() => detect(imageRef.current, model, canvasRef.current)}
+                onLoad={() => detect(imageRef.current, model, canvasRef.current, handleDetection)}
               />
               <video
                 autoPlay
                 muted
                 ref={cameraRef}
-                onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current)}
+                onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current, handleDetection)}
               />
               <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
             </>

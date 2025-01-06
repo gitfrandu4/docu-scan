@@ -21,5 +21,9 @@
   "backToCamera": "Switch to camera",
   "newImage": "Upload new image",
   "uploadImage": "Upload image",
-  "toggleCamera": "Toggle camera"
+  "toggleCamera": "Toggle camera",
+  "resultTitle": "Scanned Document",
+  "resultImage": "Scanned document image",
+  "backToScan": "Back to scanner",
+  "downloadResult": "Download image"
 }
