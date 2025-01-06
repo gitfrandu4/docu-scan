@@ -181,47 +181,62 @@ const App = () => {
   };
 
   useEffect(() => {
+    // Register service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(
-          (registration) => {
-            console.log('ServiceWorker registration successful');
-          },
-          (err) => {
-            console.log('ServiceWorker registration failed: ', err);
-          }
-        );
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('🔧 ServiceWorker registration successful:', registration.scope);
+          })
+          .catch(error => {
+            console.warn('🚫 ServiceWorker registration failed:', error);
+          });
       });
     }
 
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 3000);
+    }, 5000);
 
+    // Load model
     tf.ready().then(async () => {
-      const yolov11 = await tf.loadGraphModel(
-        `${window.location.href}/${modelName}_web_model/model.json`,
-        {
-          onProgress: (fractions) => {
-            setLoading({ loading: true, progress: fractions });
-          },
-        }
-      );
+      try {
+        const yolov11 = await tf.loadGraphModel(
+          `${window.location.href}/${modelName}_web_model/model.json`,
+          {
+            onProgress: (fractions) => {
+              setLoading({ loading: true, progress: fractions });
+            },
+          }
+        );
 
-      const dummyInput = tf.ones(yolov11.inputs[0].shape);
-      const warmupResults = yolov11.execute(dummyInput);
+        const dummyInput = tf.ones(yolov11.inputs[0].shape);
+        const warmupResults = yolov11.execute(dummyInput);
 
-      setLoading({ loading: false, progress: 1 });
-      setModel({
-        net: yolov11,
-        inputShape: yolov11.inputs[0].shape,
-      });
+        setLoading({ loading: false, progress: 1 });
+        setModel({
+          net: yolov11,
+          inputShape: yolov11.inputs[0].shape,
+        });
 
-      tf.dispose([warmupResults, dummyInput]);
+        tf.dispose([warmupResults, dummyInput]);
+      } catch (error) {
+        console.error('❌ Error loading model:', error);
+        setLoading({ loading: false, progress: 0 });
+      }
     });
 
     return () => clearTimeout(splashTimer);
   }, []);
+
+  if (showSplash || loading.loading) {
+    return (
+      <>
+        {showSplash && <SplashScreen />}
+        {loading.loading && <Loader>{t('loading')} {(loading.progress * 100).toFixed(2)}%</Loader>}
+      </>
+    );
+  }
 
   if (croppedImage) {
     return (
@@ -240,48 +255,45 @@ const App = () => {
   }
 
   return (
-    <>
-      {showSplash && <SplashScreen />}
-      <div className="App">
-        {loading.loading && <Loader>{t('loading')} {(loading.progress * 100).toFixed(2)}%</Loader>}
-        <div className="header">
-          <h1>DocuScan AI</h1>
-        </div>
-
-        <div className="content">
-          {model.net && (
-            <>
-              <img
-                src="#"
-                ref={imageRef}
-                onLoad={() => detect(imageRef.current, model, canvasRef.current, handleDetection)}
-              />
-              <video
-                autoPlay
-                muted
-                ref={cameraRef}
-                style={{ display: "none" }}
-                onPlay={() => {
-                  if (!croppedImage) {
-                    detectVideo(cameraRef.current, model, canvasRef.current, handleDetection);
-                  }
-                }}
-              />
-              <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
-            </>
-          )}
-        </div>
-
-        <ButtonHandler 
-          imageRef={imageRef} 
-          cameraRef={cameraRef} 
-          canvasRef={canvasRef}
-          model={model}
-          isModelLoaded={!!model.net}
-          setShouldCrop={setShouldCrop}
-        />
+    <div className="App">
+      <div className="header">
+        <h1>DocuScan AI</h1>
       </div>
-    </>
+
+      <div className="content">
+        {model.net && (
+          <>
+            <img
+              src="#"
+              ref={imageRef}
+              onLoad={() => detect(imageRef.current, model, canvasRef.current, handleDetection)}
+            />
+            <video
+              autoPlay
+              muted
+              ref={cameraRef}
+              style={{ display: "none" }}
+              onPlay={() => {
+                if (!croppedImage && !showSplash && !loading.loading) {
+                  // Only start detection when everything is ready
+                  detectVideo(cameraRef.current, model, canvasRef.current, handleDetection);
+                }
+              }}
+            />
+            <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
+          </>
+        )}
+      </div>
+
+      <ButtonHandler 
+        imageRef={imageRef} 
+        cameraRef={cameraRef} 
+        canvasRef={canvasRef}
+        model={model}
+        isModelLoaded={!!model.net}
+        setShouldCrop={setShouldCrop}
+      />
+    </div>
   );
 };
 
