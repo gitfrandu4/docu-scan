@@ -38,6 +38,13 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
 
   const captureFrame = () => {
     const video = cameraRef.current;
+    
+    // Ensure video has valid dimensions
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      console.log('⏳ Waiting for video to be ready...');
+      return;
+    }
+    
     const canvas = tempCanvasRef.current;
     
     // Set canvas size to match video dimensions
@@ -58,9 +65,12 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
       imageRef.current.style.display = "block";
       video.style.display = "none";
       setStreaming("image");
-      // Run single detection on the captured frame
-      detect(imageRef.current, model, canvasRef.current, null);
-      setShouldCrop(true); // This will trigger the crop in handleDetection
+      
+      // Run single detection on the captured frame after a short delay to ensure the image is loaded
+      setTimeout(() => {
+        detect(imageRef.current, model, canvasRef.current, null);
+        setShouldCrop(true); // This will trigger the crop in handleDetection
+      }, 100);
     }, 'image/jpeg', 0.95);
   };
 
