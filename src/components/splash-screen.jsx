@@ -6,7 +6,11 @@ const SplashScreen = () => {
     <div className="splash-screen">
       <div className="splash-content">
         <div className="logo-container">
-          <span className="logo">📑</span>
+          <img 
+            src="/icons/android/android-launchericon-144-144.png" 
+            alt="DocuScan AI"
+            className="logo"
+          />
           <div className="scan-line"></div>
         </div>
         <h1 className="app-name">DocuScan AI</h1>
