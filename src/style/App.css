@@ -1,16 +1,16 @@
 body {
   margin: 0;
   padding: 0;
-  padding: 0-color: #121212;
-  color: wh
   background-color: #121212;
   color: white;
   min-height: 100vh;
-}pp {
-height: 100%ative;
+}
+
+.App {
+  height: 100%;
+  padding: 0 10px;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -23,13 +23,13 @@ height: 100%ative;
 
 .header {
   text-align: center;
-  align-items: center;
+  padding: 10px;
   position: absolute;
-  background-color: #121212;
-}
-
-.Az-index: 10;
-  margin: 3px 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
 }
 
 .header h1 {
@@ -37,22 +37,22 @@ height: 100%ative;
   font-size: 1.2rem;
   font-weight: 500;
 }
-  ;
-  eader p {
-  display: none;;
-  top: 0;
-  left: 0;
-.code {
-  right: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-}nd-c
-.hborder-radiu fonpx;;
+
+.header p {
+  display: none;
 }
+
+.code {
+  padding: 5px;
+  color: greenyellow;
   background-color: black;
   border-radius: 5px;
 }
 
-.conten
+.content {
+  position: relative;
+}
+
 .content > img {
   display: none;
   width: 100%;
@@ -65,62 +65,9 @@ height: 100%ative;
   width: 100%;
   max-width: 720px;
   max-height: 500px;
-  display: none;
-  
-.content > canv;
-  position: absolute;
-  top: 0;
-  left: 0;
-}dth: 
-20px;
-  max-height: 500px;
-  border-radius: 10px;
-  bottom: 20px;}
-  display: n
-  width: 1;0px;
-  max-heighfx;
-}
-  align-items: center;
-  padding: 20px;
-  z-index: 20;
 }
 
-button {
-  text-decoration: none;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  border: none;
-  margin: 0 10px;
-  padding: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-  backdrop-filter: blur(5px);
-  transition: all 0.2s ease;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-
-.content {
-  position: relative;
-}tton.capture-btn {
-
-  height: 70px;
-  background-color: transparent;
-  border: 3px solid #007AFF;
-  position: relative;
-}
-
-button.capture-btn::after {
-  content: '';
-  position: absolute;
-  width: 90%;
-  height: 90%;
-  background-color: white;
-  border-radius: 50%;
-}
-
-button:hover {
+.content > canvas {
   position: absolute;
   top: 0;
   left: 0;
