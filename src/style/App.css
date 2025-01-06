@@ -1,3 +1,11 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #121212;
+  color: white;
+  min-height: 100vh;
+}
+
 .App {
   height: 100%;
   padding: 0 10px;
@@ -6,6 +14,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: #121212;
 }
 
 .App > * {
@@ -14,10 +23,23 @@
 
 .header {
   text-align: center;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .header p {
-  margin: 5px 0;
+  display: none;
 }
 
 .code {
