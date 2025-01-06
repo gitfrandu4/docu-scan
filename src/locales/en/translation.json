@@ -17,5 +17,9 @@
   },
   "errors": {
     "streamConflict": "Can't handle more than 1 stream\nCurrently streaming: {{stream}}"
-  }
+  },
+  "backToCamera": "Switch to camera",
+  "newImage": "Upload new image",
+  "uploadImage": "Upload image",
+  "toggleCamera": "Toggle camera"
 }

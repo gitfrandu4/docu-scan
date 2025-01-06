@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
+import { MdCameraAlt, MdFileUpload, MdCameraswitch } from "react-icons/md";
 import { Webcam } from "../utils/webcam";
 import LanguageSwitcher from "./language-switcher";
 
@@ -33,34 +34,54 @@ const ButtonHandler = ({ imageRef, cameraRef, isModelLoaded }) => {
 
   return (
     <div className="btn-container">
-      <button
-        onClick={() => {
-          if (streaming === null || streaming === 'camera') {
-            webcam.close(cameraRef.current);
-            cameraRef.current.style.display = "none";
-            inputImageRef.current.click();
-          } else if (streaming === "image") {
-            closeImage();
-          }
-        }}
-      >
-        {streaming === "image" ? "📷" : "📁"}
-      </button>
-
-      <button
-        className="capture-btn"
-        onClick={() => {
-          if (streaming === "camera") {
-            webcam.close(cameraRef.current);
-            cameraRef.current.style.display = "none";
-            setStreaming(null);
-          } else {
-            webcam.open(cameraRef.current);
-            cameraRef.current.style.display = "block";
-            setStreaming("camera");
-          }
-        }}
-      />
+      {streaming === "image" ? (
+        <>
+          <button 
+            onClick={closeImage}
+            title={t('backToCamera')}
+          >
+            <MdCameraAlt size={24} />
+          </button>
+          <button 
+            onClick={() => inputImageRef.current.click()}
+            title={t('newImage')}
+          >
+            <MdFileUpload size={24} />
+          </button>
+        </>
+      ) : (
+        <>
+          <button 
+            onClick={() => {
+              if (streaming === 'camera') {
+                webcam.close(cameraRef.current);
+                cameraRef.current.style.display = "none";
+              }
+              inputImageRef.current.click();
+            }}
+            title={t('uploadImage')}
+          >
+            <MdFileUpload size={24} />
+          </button>
+          <button
+            className="capture-btn"
+            onClick={() => {
+              if (streaming === "camera") {
+                webcam.close(cameraRef.current);
+                cameraRef.current.style.display = "none";
+                setStreaming(null);
+              } else {
+                webcam.open(cameraRef.current);
+                cameraRef.current.style.display = "block";
+                setStreaming("camera");
+              }
+            }}
+            title={t('toggleCamera')}
+          >
+            <MdCameraswitch size={24} />
+          </button>
+        </>
+      )}
 
       <LanguageSwitcher />
 
@@ -69,12 +90,14 @@ const ButtonHandler = ({ imageRef, cameraRef, isModelLoaded }) => {
         accept="image/*"
         style={{ display: "none" }}
         onChange={(e) => {
-          const url = URL.createObjectURL(e.target.files[0]);
-          imageRef.current.src = url;
-          imageRef.current.style.display = "block";
-          webcam.close(cameraRef.current);
-          cameraRef.current.style.display = "none";
-          setStreaming("image");
+          if (e.target.files[0]) {
+            const url = URL.createObjectURL(e.target.files[0]);
+            imageRef.current.src = url;
+            imageRef.current.style.display = "block";
+            webcam.close(cameraRef.current);
+            cameraRef.current.style.display = "none";
+            setStreaming("image");
+          }
         }}
         ref={inputImageRef}
       />
