@@ -15,6 +15,7 @@ const App = () => {
   const [loading, setLoading] = useState({ loading: true, progress: 0 });
   const [showSplash, setShowSplash] = useState(true);
   const [croppedImage, setCroppedImage] = useState(null);
+  const [shouldCrop, setShouldCrop] = useState(false);
   const [model, setModel] = useState({
     net: null,
     inputShape: [1, 0, 0, 3],
@@ -33,8 +34,25 @@ const App = () => {
       const [y1, x1, y2, x2] = boxes_data.slice(0, 4);
       console.log('📦 Raw detection box:', { y1, x1, y2, x2 });
       
-      const sourceElement = imageRef.current.style.display !== "none" ? imageRef.current : cameraRef.current;
+      // First check if video is active, then fallback to image
+      const sourceElement = cameraRef.current?.style.display !== "none" ? cameraRef.current : imageRef.current;
       console.log('🖼️ Source element type:', sourceElement instanceof HTMLVideoElement ? 'video' : 'image');
+      
+      // Only proceed with cropping if it's an image or if shouldCrop is true for video
+      if (sourceElement instanceof HTMLVideoElement && !shouldCrop) {
+        console.log('⏳ Waiting for shot button click...');
+        console.groupEnd();
+        return;
+      }
+      
+      // For video, ensure it's ready and has valid dimensions
+      if (sourceElement instanceof HTMLVideoElement) {
+        if (!sourceElement.videoWidth || !sourceElement.videoHeight) {
+          console.log('⏳ Waiting for video dimensions to be available...');
+          console.groupEnd();
+          return;
+        }
+      }
       
       // Check if the source element is ready
       if (!sourceElement || 
@@ -150,8 +168,11 @@ const App = () => {
         const croppedDataUrl = tempCanvas.toDataURL('image/png');
         console.log('✅ Successfully created cropped image');
         setCroppedImage(croppedDataUrl);
+        // Reset the crop flag after successful crop
+        setShouldCrop(false);
       } catch (error) {
         console.error('❌ Error cropping image:', error);
+        setShouldCrop(false);
       }
     } else {
       console.log('ℹ️ No detections found');
@@ -210,7 +231,8 @@ const App = () => {
           setCroppedImage(null);
           // Reset video if it was active
           if (cameraRef.current && cameraRef.current.style.display !== "none") {
-            detectVideo(cameraRef.current, model, canvasRef.current);
+            cameraRef.current.style.display = "block";
+            detectVideo(cameraRef.current, model, canvasRef.current, handleDetection);
           }
         }}
       />
@@ -238,7 +260,12 @@ const App = () => {
                 autoPlay
                 muted
                 ref={cameraRef}
-                onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current, handleDetection)}
+                style={{ display: "none" }}
+                onPlay={() => {
+                  if (!croppedImage) {
+                    detectVideo(cameraRef.current, model, canvasRef.current, handleDetection);
+                  }
+                }}
               />
               <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
             </>
@@ -248,7 +275,10 @@ const App = () => {
         <ButtonHandler 
           imageRef={imageRef} 
           cameraRef={cameraRef} 
+          canvasRef={canvasRef}
+          model={model}
           isModelLoaded={!!model.net}
+          setShouldCrop={setShouldCrop}
         />
       </div>
     </>
