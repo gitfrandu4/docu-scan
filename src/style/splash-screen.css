@@ -1,0 +1,185 @@
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.splash-content {
+  text-align: center;
+  color: white;
+  /* animation: fadeIn 0.5s ease-out; */
+  position: relative;
+  z-index: 2;
+}
+
+.logo-container {
+  position: relative;
+  width: 144px;
+  height: 144px;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.morph-background {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 107, 107, 0.7),
+    rgba(78, 205, 196, 0.7),
+    rgba(69, 183, 209, 0.7)
+  );
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.3;
+  animation: morphShape 4s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.logo {
+  width: 144px;
+  height: 144px;
+  object-fit: contain;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #45b7d1,
+    transparent
+  );
+  animation: scan 2s ease-in-out infinite;
+  z-index: 2;
+}
+
+.app-name {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  background: linear-gradient(45deg, #ffffff, #45b7d1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.tagline {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes scan {
+  0% {
+    top: 0;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0;
+  }
+}
+
+@keyframes morphShape {
+  0% {
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  33% {
+    border-radius: 45% 55% 65% 35%;
+    transform: translate(-50%, -50%) scale(1.1) rotate(120deg);
+  }
+  66% {
+    border-radius: 35% 65% 45% 55%;
+    transform: translate(-50%, -50%) scale(0.9) rotate(240deg);
+  }
+  100% {
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo-container {
+    width: 120px;
+    height: 120px;
+  }
+
+  .logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .morph-background {
+    width: 160px;
+    height: 160px;
+  }
+
+  .app-name {
+    font-size: 1.8rem;
+  }
+
+  .tagline {
+    font-size: 1rem;
+  }
+} 

@@ -1,0 +1,18 @@
+{
+  "appName": "DocuScan AI",
+  "tagline": "Intelligent Document Scanning",
+  "loading": "Loading model",
+  "title": "Object Detection",
+  "description": "Real-time object detection with",
+  "serving": "Serving model",
+  "buttons": {
+    "image": {
+      "open": "Upload Image",
+      "close": "Close Image"
+    },
+    "webcam": {
+      "open": "Start Camera",
+      "close": "Stop Camera"
+    }
+  }
+} 
