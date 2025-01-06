@@ -1,0 +1,23 @@
+{
+  "title": "📷 Aplicación de Detección en Vivo YOLOv11",
+  "description": "Aplicación de detección en vivo YOLOv11 en navegador impulsada por",
+  "serving": "Sirviendo",
+  "loading": "Cargando modelo...",
+  "buttons": {
+    "image": {
+      "open": "Abrir Imagen",
+      "close": "Cerrar Imagen"
+    },
+    "video": {
+      "open": "Abrir Video",
+      "close": "Cerrar Video"
+    },
+    "webcam": {
+      "open": "Abrir Cámara",
+      "close": "Cerrar Cámara"
+    }
+  },
+  "errors": {
+    "streamConflict": "No se puede manejar más de 1 transmisión\nTransmitiendo actualmente: {{stream}}"
+  }
+} 

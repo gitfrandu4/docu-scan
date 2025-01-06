@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl"; // set backend to webgl
+import { useTranslation } from 'react-i18next';
+import './i18n';
 import Loader from "./components/loader";
 import ButtonHandler from "./components/btn-handler";
 import { detect, detectVideo } from "./utils/detect";
 import "./style/App.css";
 
 const App = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState({ loading: true, progress: 0 }); // loading state
   const [model, setModel] = useState({
     net: null,
@@ -49,14 +52,14 @@ const App = () => {
 
   return (
     <div className="App">
-      {loading.loading && <Loader>Loading model... {(loading.progress * 100).toFixed(2)}%</Loader>}
+      {loading.loading && <Loader>{t('loading')} {(loading.progress * 100).toFixed(2)}%</Loader>}
       <div className="header">
-        <h1>📷 YOLOv11 Live Detection App</h1>
+        <h1>{t('title')}</h1>
         <p>
-          YOLOv11 live detection application on browser powered by <code>tensorflow.js</code>
+          {t('description')} <code>tensorflow.js</code>
         </p>
         <p>
-          Serving : <code className="code">{modelName}</code>
+          {t('serving')}: <code className="code">{modelName}</code>
         </p>
       </div>
 

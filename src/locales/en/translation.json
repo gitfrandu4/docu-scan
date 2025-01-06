@@ -1,0 +1,23 @@
+{
+  "title": "📷 YOLOv11 Live Detection App",
+  "description": "YOLOv11 live detection application on browser powered by",
+  "serving": "Serving",
+  "loading": "Loading model...",
+  "buttons": {
+    "image": {
+      "open": "Open Image",
+      "close": "Close Image"
+    },
+    "video": {
+      "open": "Open Video",
+      "close": "Close Video"
+    },
+    "webcam": {
+      "open": "Open Webcam",
+      "close": "Close Webcam"
+    }
+  },
+  "errors": {
+    "streamConflict": "Can't handle more than 1 stream\nCurrently streaming: {{stream}}"
+  }
+} 

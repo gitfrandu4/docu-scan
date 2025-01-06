@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
+import { useTranslation } from 'react-i18next';
 import { Webcam } from "../utils/webcam";
 
 const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
+  const { t } = useTranslation();
   const [streaming, setStreaming] = useState(null); // streaming state
   const inputImageRef = useRef(null); // video input reference
   const inputVideoRef = useRef(null); // video input reference
@@ -50,10 +52,10 @@ const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
           if (streaming === null) inputImageRef.current.click();
           // closing image streaming
           else if (streaming === "image") closeImage();
-          else alert(`Can't handle more than 1 stream\nCurrently streaming : ${streaming}`); // if streaming video or webcam
+          else alert(t('errors.streamConflict', { stream: streaming })); // if streaming video or webcam
         }}
       >
-        {streaming === "image" ? "Close" : "Open"} Image
+        {streaming === "image" ? t('buttons.image.close') : t('buttons.image.open')}
       </button>
 
       {/* Video Handler */}
@@ -77,10 +79,10 @@ const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
           if (streaming === null || streaming === "image") inputVideoRef.current.click();
           // closing video streaming
           else if (streaming === "video") closeVideo();
-          else alert(`Can't handle more than 1 stream\nCurrently streaming : ${streaming}`); // if streaming webcam
+          else alert(t('errors.streamConflict', { stream: streaming })); // if streaming webcam
         }}
       >
-        {streaming === "video" ? "Close" : "Open"} Video
+        {streaming === "video" ? t('buttons.video.close') : t('buttons.video.open')}
       </button>
 
       {/* Webcam Handler */}
@@ -99,10 +101,10 @@ const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
             webcam.close(cameraRef.current);
             cameraRef.current.style.display = "none";
             setStreaming(null);
-          } else alert(`Can't handle more than 1 stream\nCurrently streaming : ${streaming}`); // if streaming video
+          } else alert(t('errors.streamConflict', { stream: streaming })); // if streaming video
         }}
       >
-        {streaming === "camera" ? "Close" : "Open"} Webcam
+        {streaming === "camera" ? t('buttons.webcam.close') : t('buttons.webcam.open')}
       </button>
     </div>
   );
