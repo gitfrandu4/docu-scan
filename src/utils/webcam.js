@@ -31,6 +31,6 @@ export class Webcam {
         track.stop();
       });
       videoRef.srcObject = null;
-    } else alert("Please open Webcam first!");
+    }
   };
 }
