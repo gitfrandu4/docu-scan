@@ -1,0 +1,139 @@
+.document-scanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.scanner-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  aspect-ratio: 16/9;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scanner-viewport video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-viewport canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.scanner-viewport::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.scanner-controls {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.scanner-controls button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.scanner-controls button:first-child {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.scanner-controls button:first-child:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.scanner-controls button:last-child {
+  background-color: #2196F3;
+  color: white;
+}
+
+.scanner-controls button:last-child:hover {
+  background-color: #1976D2;
+  transform: translateY(-1px);
+}
+
+.scanner-controls button:active {
+  transform: translateY(1px);
+}
+
+.scanned-document {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.scanned-document img {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.ocr-text {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.ocr-text pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  padding: 10px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .document-scanner {
+    padding: 10px;
+  }
+  
+  .scanner-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .scanner-controls button {
+    width: 100%;
+  }
+} 

@@ -1,0 +1,14 @@
+{
+  "documentScanner": {
+    "title": "Document Scanner",
+    "scannedDocument": "Scanned Document",
+    "extractedText": "Extracted Text",
+    "cameraPermission": "Please grant camera permission to use the document scanner.",
+    "startScanning": "Start Scanning",
+    "stopScanning": "Stop Scanning",
+    "captureDocument": "Capture Document"
+  },
+  "loading": {
+    "model": "Loading model... {{progress}}%"
+  }
+} 

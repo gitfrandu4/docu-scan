@@ -1,0 +1,14 @@
+{
+  "documentScanner": {
+    "title": "Escáner de Documentos",
+    "scannedDocument": "Documento Escaneado",
+    "extractedText": "Texto Extraído",
+    "cameraPermission": "Por favor, conceda permiso de cámara para usar el escáner de documentos.",
+    "startScanning": "Iniciar Escaneo",
+    "stopScanning": "Detener Escaneo",
+    "captureDocument": "Capturar Documento"
+  },
+  "loading": {
+    "model": "Cargando modelo... {{progress}}%"
+  }
+} 

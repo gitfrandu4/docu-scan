@@ -1,23 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-backend-webgl"; // set backend to webgl
+import "@tensorflow/tfjs-backend-webgl";
+import { useTranslation } from 'react-i18next';
 import Loader from "./components/loader";
-import ButtonHandler from "./components/btn-handler";
-import { detect, detectVideo } from "./utils/detect";
+import DocumentScanner from "./components/DocumentScanner";
+import './i18n/config';
 import "./style/App.css";
 
 const App = () => {
-  const [loading, setLoading] = useState({ loading: true, progress: 0 }); // loading state
+  const { t, i18n } = useTranslation();
+  const [loading, setLoading] = useState({ loading: true, progress: 0 });
   const [model, setModel] = useState({
     net: null,
     inputShape: [1, 0, 0, 3],
-  }); // init model & input shape
-
-  // references
-  const imageRef = useRef(null);
-  const cameraRef = useRef(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+  });
+  const [scannedDocument, setScannedDocument] = useState(null);
 
   // model configs
   const modelName = "yolov11n";
@@ -28,10 +25,10 @@ const App = () => {
         `${window.location.href}/${modelName}_web_model/model.json`,
         {
           onProgress: (fractions) => {
-            setLoading({ loading: true, progress: fractions }); // set loading fractions
+            setLoading({ loading: true, progress: fractions });
           },
         }
-      ); // load model
+      );
 
       // warming up model
       const dummyInput = tf.ones(yolov11.inputs[0].shape);
@@ -41,47 +38,51 @@ const App = () => {
       setModel({
         net: yolov11,
         inputShape: yolov11.inputs[0].shape,
-      }); // set model & input shape
+      });
 
-      tf.dispose([warmupResults, dummyInput]); // cleanup memory
+      tf.dispose([warmupResults, dummyInput]);
     });
   }, []);
 
+  const handleDocumentDetected = ({ image, text }) => {
+    setScannedDocument({ image, text });
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="App">
-      {loading.loading && <Loader>Loading model... {(loading.progress * 100).toFixed(2)}%</Loader>}
-      <div className="header">
-        <h1>📷 YOLOv11 Live Detection App</h1>
-        <p>
-          YOLOv11 live detection application on browser powered by <code>tensorflow.js</code>
-        </p>
-        <p>
-          Serving : <code className="code">{modelName}</code>
-        </p>
+      <div className="language-switcher">
+        <button onClick={() => changeLanguage('en')}>EN</button>
+        <button onClick={() => changeLanguage('es')}>ES</button>
       </div>
-
-      <div className="content">
-        <img
-          src="#"
-          ref={imageRef}
-          onLoad={() => detect(imageRef.current, model, canvasRef.current)}
-        />
-        <video
-          autoPlay
-          muted
-          ref={cameraRef}
-          onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current)}
-        />
-        <video
-          autoPlay
-          muted
-          ref={videoRef}
-          onPlay={() => detectVideo(videoRef.current, model, canvasRef.current)}
-        />
-        <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
-      </div>
-
-      <ButtonHandler imageRef={imageRef} cameraRef={cameraRef} videoRef={videoRef} />
+      {loading.loading ? (
+        <Loader>{t('loading.model', { progress: (loading.progress * 100).toFixed(2) })}</Loader>
+      ) : (
+        <div className="content">
+          <h1>{t('documentScanner.title')}</h1>
+          <DocumentScanner
+            model={model}
+            onDocumentDetected={handleDocumentDetected}
+          />
+          {scannedDocument && (
+            <div className="scanned-document">
+              <h2>{t('documentScanner.scannedDocument')}</h2>
+              <img
+                src={scannedDocument.image}
+                alt={t('documentScanner.scannedDocument')}
+                style={{ maxWidth: '100%', maxHeight: '50vh' }}
+              />
+              <div className="ocr-text">
+                <h3>{t('documentScanner.extractedText')}:</h3>
+                <pre>{scannedDocument.text}</pre>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

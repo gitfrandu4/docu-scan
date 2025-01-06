@@ -1,73 +1,76 @@
 .App {
-  height: 100%;
-  padding: 0 10px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.App > * {
-  margin: 3px 0;
-}
-
-.header {
   text-align: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 20px;
 }
 
-.header p {
-  margin: 5px 0;
+.language-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
 }
 
-.code {
-  padding: 5px;
-  color: greenyellow;
-  background-color: black;
-  border-radius: 5px;
+.language-switcher button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #1a73e8;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #1a73e8;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.content > img {
-  display: none;
-  width: 100%;
-  max-width: 720px;
-  max-height: 500px;
-  border-radius: 10px;
-}
-
-.content > video {
-  display: none;
-  width: 100%;
-  max-width: 720px;
-  max-height: 500px;
-  border-radius: 10px;
+.language-switcher button:hover {
+  background-color: #1a73e8;
+  color: white;
 }
 
 .content {
-  position: relative;
-}
-
-.content > canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-button {
-  text-decoration: none;
-  color: white;
-  background-color: black;
-  border: 2px solid black;
-  margin: 0 5px;
-  padding: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  color: black;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   background-color: white;
-  border: 2px solid black;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #1a73e8;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+}
+
+h2 {
+  color: #202124;
+  margin: 20px 0;
+}
+
+h3 {
+  color: #5f6368;
+  margin: 15px 0;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 1.5em;
+  color: #5f6368;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
 }
