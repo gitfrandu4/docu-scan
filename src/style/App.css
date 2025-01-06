@@ -23,19 +23,49 @@ body {
 
 .header {
   text-align: center;
-  padding: 10px;
+  padding: 16px;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(to bottom, 
+    rgba(0,0,0,0.8) 0%, 
+    rgba(0,0,0,0.4) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.header h1::before {
+  content: '';
+  width: 1.5em;
+  height: 1.5em;
+  background: linear-gradient(
+    45deg,
+    #ff6b6b,
+    #4ecdc4,
+    #45b7d1
+  );
+  border-radius: 50%;
+  filter: blur(8px);
+  animation: morphShape 4s ease-in-out infinite;
+  display: inline-block;
 }
 
 .header p {
@@ -85,6 +115,8 @@ body {
   align-items: center;
   padding: 20px;
   z-index: 20;
+  gap: 20px;
+  min-height: 70px;
 }
 
 button {
@@ -92,7 +124,6 @@ button {
   color: white;
   background-color: rgba(0, 0, 0, 0.5);
   border: none;
-  margin: 0 10px;
   padding: 12px;
   border-radius: 50%;
   cursor: pointer;
@@ -103,6 +134,7 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0;
 }
 
 button.capture-btn {
@@ -144,5 +176,55 @@ button:active {
   button.capture-btn {
     width: 60px;
     height: 60px;
+  }
+  
+  .header {
+    padding: 12px;
+  }
+  
+  .header h1 {
+    font-size: 1.1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes morphShape {
+  0% {
+    border-radius: 50%;
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    border-radius: 45% 55% 65% 35%;
+    transform: scale(1.1) rotate(120deg);
+  }
+  66% {
+    border-radius: 35% 65% 45% 55%;
+    transform: scale(0.9) rotate(240deg);
+  }
+  100% {
+    border-radius: 50%;
+    transform: scale(1) rotate(360deg);
   }
 }

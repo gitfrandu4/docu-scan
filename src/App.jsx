@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import './i18n';
 import Loader from "./components/loader";
 import ButtonHandler from "./components/btn-handler";
-import LanguageSwitcher from "./components/language-switcher";
 import SplashScreen from "./components/splash-screen";
 import { detect, detectVideo } from "./utils/detect";
 import "./style/App.css";
@@ -26,7 +25,6 @@ const App = () => {
   const modelName = "yolov11n";
 
   useEffect(() => {
-    // Register service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then(
@@ -40,12 +38,10 @@ const App = () => {
       });
     }
 
-    // Hide splash screen after 3 seconds
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
     }, 3000);
 
-    // Load model
     tf.ready().then(async () => {
       const yolov11 = await tf.loadGraphModel(
         `${window.location.href}/${modelName}_web_model/model.json`,
@@ -75,16 +71,9 @@ const App = () => {
     <>
       {showSplash && <SplashScreen />}
       <div className="App">
-        <LanguageSwitcher />
         {loading.loading && <Loader>{t('loading')} {(loading.progress * 100).toFixed(2)}%</Loader>}
         <div className="header">
-          <h1>{t('title')}</h1>
-          <p>
-            {t('description')} <code>tensorflow.js</code>
-          </p>
-          <p>
-            {t('serving')}: <code className="code">{modelName}</code>
-          </p>
+          <h1>DocuScan AI</h1>
         </div>
 
         <div className="content">
