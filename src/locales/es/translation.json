@@ -8,10 +8,6 @@
       "open": "Abrir Imagen",
       "close": "Cerrar Imagen"
     },
-    "video": {
-      "open": "Abrir Video",
-      "close": "Cerrar Video"
-    },
     "webcam": {
       "open": "Abrir Cámara",
       "close": "Cerrar Cámara"

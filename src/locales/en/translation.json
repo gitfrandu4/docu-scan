@@ -8,10 +8,6 @@
       "open": "Open Image",
       "close": "Close Image"
     },
-    "video": {
-      "open": "Open Video",
-      "close": "Close Video"
-    },
     "webcam": {
       "open": "Open Webcam",
       "close": "Close Webcam"

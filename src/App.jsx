@@ -20,7 +20,6 @@ const App = () => {
   // references
   const imageRef = useRef(null);
   const cameraRef = useRef(null);
-  const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   // model configs
@@ -77,16 +76,10 @@ const App = () => {
           ref={cameraRef}
           onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current)}
         />
-        <video
-          autoPlay
-          muted
-          ref={videoRef}
-          onPlay={() => detectVideo(videoRef.current, model, canvasRef.current)}
-        />
         <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
       </div>
 
-      <ButtonHandler imageRef={imageRef} cameraRef={cameraRef} videoRef={videoRef} />
+      <ButtonHandler imageRef={imageRef} cameraRef={cameraRef} />
     </div>
   );
 };
