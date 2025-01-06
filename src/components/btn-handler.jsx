@@ -64,15 +64,14 @@ const ButtonHandler = ({ imageRef, cameraRef, isModelLoaded }) => {
           }
         }}
       >
-        {streaming === "image" ? t('buttons.image.close') : t('buttons.image.open')}
+        {streaming === "image" ? "📷" : "📁"}
       </button>
 
       {/* Webcam Handler */}
       <button
+        className="capture-btn"
         onClick={() => {
-          if (streaming === "image") {
-            closeImage();
-          } else if (streaming === "camera") {
+          if (streaming === "camera") {
             webcam.close(cameraRef.current);
             cameraRef.current.style.display = "none";
             setStreaming(null);
@@ -82,9 +81,7 @@ const ButtonHandler = ({ imageRef, cameraRef, isModelLoaded }) => {
             setStreaming("camera");
           }
         }}
-      >
-        {streaming === "camera" ? t('buttons.webcam.close') : t('buttons.webcam.open')}
-      </button>
+      />
     </div>
   );
 };

@@ -77,19 +77,74 @@ body {
   height: 100%;
 }
 
+.btn-container {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 20;
+}
+
 button {
   text-decoration: none;
   color: white;
-  background-color: black;
-  border: 2px solid black;
-  margin: 0 5px;
-  padding: 5px;
-  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  margin: 0 10px;
+  padding: 12px;
+  border-radius: 50%;
   cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button.capture-btn {
+  width: 70px;
+  height: 70px;
+  background-color: transparent;
+  border: 3px solid #007AFF;
+  position: relative;
+}
+
+button.capture-btn::after {
+  content: '';
+  position: absolute;
+  width: 90%;
+  height: 90%;
+  background-color: white;
+  border-radius: 50%;
 }
 
 button:hover {
-  color: black;
-  background-color: white;
-  border: 2px solid black;
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+button.capture-btn:hover {
+  background-color: transparent;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  button {
+    width: 40px;
+    height: 40px;
+  }
+  
+  button.capture-btn {
+    width: 60px;
+    height: 60px;
+  }
 }
