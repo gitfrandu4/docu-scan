@@ -1,19 +1,21 @@
 {
-  "title": "📷 YOLOv11 Live Detection App",
-  "description": "YOLOv11 live detection application on browser powered by",
-  "serving": "Serving",
-  "loading": "Loading model...",
+  "appName": "DocuScan AI",
+  "tagline": "Intelligent Document Scanning",
+  "loading": "Loading model",
+  "title": "Object Detection",
+  "description": "Real-time object detection with",
+  "serving": "Serving model",
   "buttons": {
     "image": {
-      "open": "Open Image",
+      "open": "Upload Image",
       "close": "Close Image"
     },
     "webcam": {
-      "open": "Open Webcam",
-      "close": "Close Webcam"
+      "open": "Start Camera",
+      "close": "Stop Camera"
     }
   },
   "errors": {
     "streamConflict": "Can't handle more than 1 stream\nCurrently streaming: {{stream}}"
   }
-} 
+}

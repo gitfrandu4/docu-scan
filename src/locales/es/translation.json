@@ -1,19 +1,18 @@
 {
-  "title": "📷 Aplicación de Detección en Vivo YOLOv11",
-  "description": "Aplicación de detección en vivo YOLOv11 en navegador impulsada por",
-  "serving": "Sirviendo",
-  "loading": "Cargando modelo...",
+  "appName": "DocuScan AI",
+  "tagline": "Escaneo Inteligente de Documentos",
+  "loading": "Cargando modelo",
+  "title": "Detección de Objetos",
+  "description": "Detección de objetos en tiempo real con",
+  "serving": "Modelo en uso",
   "buttons": {
     "image": {
-      "open": "Abrir Imagen",
+      "open": "Subir Imagen",
       "close": "Cerrar Imagen"
     },
     "webcam": {
-      "open": "Abrir Cámara",
-      "close": "Cerrar Cámara"
+      "open": "Iniciar Cámara",
+      "close": "Detener Cámara"
     }
-  },
-  "errors": {
-    "streamConflict": "No se puede manejar más de 1 transmisión\nTransmitiendo actualmente: {{stream}}"
   }
-} 
+}

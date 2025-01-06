@@ -12,13 +12,13 @@ const SplashScreen = () => {
           <div className="morph-background"></div>
           <img 
             src="/icons/android/android-launchericon-144-144.png" 
-            alt="DocuScan AI"
+            alt={t('appName')}
             className="logo"
           />
           <div className="scan-line"></div>
         </div>
-        <h1 className="app-name">{t('appName', 'DocuScan AI')}</h1>
-        <p className="tagline">{t('tagline', 'Intelligent Document Scanning')}</p>
+        <h1 className="app-name">{t('appName')}</h1>
+        <p className="tagline">{t('tagline')}</p>
       </div>
     </div>
   );
