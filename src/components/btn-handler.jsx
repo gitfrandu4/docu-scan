@@ -2,17 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { Webcam } from "../utils/webcam";
 
-const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
+const ButtonHandler = ({ imageRef, cameraRef, isModelLoaded }) => {
   const { t } = useTranslation();
   const [streaming, setStreaming] = useState('camera'); // Start with camera streaming
   const inputImageRef = useRef(null);
   const webcam = new Webcam();
 
-  // Start webcam automatically when component mounts
+  // Start webcam automatically when component mounts and model is loaded
   useEffect(() => {
-    webcam.open(cameraRef.current);
-    cameraRef.current.style.display = "block";
-  }, []);
+    if (isModelLoaded && streaming === 'camera') {
+      webcam.open(cameraRef.current);
+      cameraRef.current.style.display = "block";
+    }
+  }, [isModelLoaded]);
 
   // closing image
   const closeImage = () => {
@@ -28,6 +30,10 @@ const ButtonHandler = ({ imageRef, cameraRef, videoRef }) => {
     webcam.open(cameraRef.current);
     cameraRef.current.style.display = "block";
   };
+
+  if (!isModelLoaded) {
+    return null; // Don't show buttons until model is loaded
+  }
 
   return (
     <div className="btn-container">

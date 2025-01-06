@@ -88,21 +88,29 @@ const App = () => {
         </div>
 
         <div className="content">
-          <img
-            src="#"
-            ref={imageRef}
-            onLoad={() => detect(imageRef.current, model, canvasRef.current)}
-          />
-          <video
-            autoPlay
-            muted
-            ref={cameraRef}
-            onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current)}
-          />
-          <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
+          {model.net && (
+            <>
+              <img
+                src="#"
+                ref={imageRef}
+                onLoad={() => detect(imageRef.current, model, canvasRef.current)}
+              />
+              <video
+                autoPlay
+                muted
+                ref={cameraRef}
+                onPlay={() => detectVideo(cameraRef.current, model, canvasRef.current)}
+              />
+              <canvas width={model.inputShape[1]} height={model.inputShape[2]} ref={canvasRef} />
+            </>
+          )}
         </div>
 
-        <ButtonHandler imageRef={imageRef} cameraRef={cameraRef} />
+        <ButtonHandler 
+          imageRef={imageRef} 
+          cameraRef={cameraRef} 
+          isModelLoaded={!!model.net}
+        />
       </div>
     </>
   );
