@@ -1,0 +1,93 @@
+.language-switcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.language-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2196F3;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.language-button:hover {
+  background: #1976D2;
+  transform: scale(1.05);
+}
+
+.language-button:active {
+  transform: scale(0.95);
+}
+
+.language-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.language-switcher.open .language-options {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.language-option {
+  padding: 8px 16px;
+  border-radius: 24px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  font-size: 16px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.language-option:hover {
+  background: #f5f5f5;
+  transform: translateX(-5px);
+}
+
+.language-option.active {
+  background: #E3F2FD;
+  border-color: #2196F3;
+  color: #1976D2;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .language-switcher {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .language-option {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  
+  /* Ensure the options don't overflow on small screens */
+  .language-options {
+    max-width: calc(100vw - 32px);
+  }
+} 

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './i18n';
 import Loader from "./components/loader";
 import ButtonHandler from "./components/btn-handler";
+import LanguageSwitcher from "./components/language-switcher";
 import { detect, detectVideo } from "./utils/detect";
 import "./style/App.css";
 
@@ -52,6 +53,7 @@ const App = () => {
 
   return (
     <div className="App">
+      <LanguageSwitcher />
       {loading.loading && <Loader>{t('loading')} {(loading.progress * 100).toFixed(2)}%</Loader>}
       <div className="header">
         <h1>{t('title')}</h1>
