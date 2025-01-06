@@ -1,34 +1,32 @@
 .language-switcher {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 8px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .language-button {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: #2196F3;
+  background: rgba(0, 0, 0, 0.5);
   border: none;
-  color: white;
-  font-size: 24px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  margin: 0;
 }
 
 .language-button:hover {
-  background: #1976D2;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
 }
 
 .language-button:active {
@@ -36,59 +34,64 @@
 }
 
 .language-options {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 8px;
   opacity: 0;
-  transform: translateY(10px);
   pointer-events: none;
   transition: all 0.3s ease;
 }
 
 .language-switcher.open .language-options {
   opacity: 1;
-  transform: translateY(0);
   pointer-events: all;
+  transform: translateX(-50%) translateY(-8px);
 }
 
 .language-option {
   padding: 8px 16px;
-  border-radius: 24px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
   white-space: nowrap;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  color: #000;
+  color: rgba(255, 255, 255, 0.8);
+  min-width: 120px;
+  text-align: left;
 }
 
 .language-option:hover {
-  background: #f5f5f5;
-  transform: translateX(-5px);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
 .language-option.active {
-  background: #E3F2FD;
-  border-color: #2196F3;
-  color: #1976D2;
+  background: rgba(0, 122, 255, 0.3);
+  color: white;
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
-  .language-switcher {
-    bottom: 16px;
-    right: 16px;
+  .language-button {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
 
   .language-option {
-    font-size: 14px;
+    font-size: 0.9rem;
     padding: 6px 12px;
-  }
-  
-  /* Ensure the options don't overflow on small screens */
-  .language-options {
-    max-width: calc(100vw - 32px);
+    min-width: 100px;
   }
 } 
