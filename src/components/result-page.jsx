@@ -23,7 +23,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
 
   const [selectedType, setSelectedType] = useState('')
   const [isEnhanced, setIsEnhanced] = useState(false)
-  const enhancedCanvasRef = useRef(null);
+  const enhancedCanvasRef = useRef(null)
 
   // Función para redimensionar la imagen
   const resizeImage = (imageElement, targetWidth, targetHeight) => {
@@ -90,7 +90,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
       if (isEnhanced && enhancedCanvasRef.current) {
         // Use the stored enhanced canvas directly for OCR
         processWithOCR(enhancedCanvasRef.current, fieldCoordinates)
-        
+
         // Ensure the enhanced image stays displayed
         const resultContainer = document.querySelector('.result-content')
         const oldImage = resultContainer.querySelector('img.result-image')
@@ -141,16 +141,12 @@ const ResultPage = ({ croppedImage, onBack }) => {
         ctx.drawImage(img, 0, 0, FIXED_WIDTH, FIXED_HEIGHT)
 
         const processedMat = processImage(window.cv, displayCanvas, {
-          morphKernelSize: 3,
-          cannyLow: 30,
-          cannyHigh: 80,
-          gaussianBlurSize: 3,
-          sharpenWeight: 1.0,
-          useAdaptiveThreshold: false,
-          adaptiveBlockSize: 9,
-          adaptiveC: 4,
-          minAreaRatio: 0.1,
-          maxAngleRange: 40
+          // Document detection parameters (from Python reference)
+          minAreaRatio: 0.25, // Minimum area ratio for document detection
+          maxAngleRange: 40 // Maximum angle range for corners
+
+          // These parameters are now handled internally with fixed values
+          // based on the Python reference for better results
         })
 
         // Store the enhanced canvas for later use
