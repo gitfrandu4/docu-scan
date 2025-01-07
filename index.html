@@ -3,14 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/docu-scan/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="theme-color" content="#2196F3" />
-    <meta name="description" content="AI-powered document scanning and enhancement application" />
+    <meta
+      name="description"
+      content="AI-powered document scanning and enhancement application"
+    />
     <link rel="manifest" href="/docu-scan/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <script>
+      // OpenCV.js initialization
+      var Module = {
+        onRuntimeInitialized: function () {
+          console.log('OpenCV.js runtime ready')
+          window.dispatchEvent(new Event('opencv-ready'))
+        },
+        setStatus: function (status) {
+          console.log('OpenCV.js status:', status)
+        },
+        print: function (text) {
+          console.log('OpenCV.js:', text)
+        },
+        printErr: function (text) {
+          console.error('OpenCV.js error:', text)
+          window.dispatchEvent(new Event('opencv-error'))
+        }
+      }
+    </script>
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
     <title>DocuScan AI</title>
-    <script type="module" crossorigin src="/docu-scan/assets/index.aee5fe28.js"></script>
-    <link rel="stylesheet" href="/docu-scan/assets/index.52fe5ca4.css">
+    <script type="module" crossorigin src="/docu-scan/assets/index.0867141a.js"></script>
+    <link rel="stylesheet" href="/docu-scan/assets/index.cb15732f.css">
   </head>
   <body>
     <div id="root"></div>
