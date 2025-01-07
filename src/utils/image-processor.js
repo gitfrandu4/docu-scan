@@ -145,14 +145,15 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       type: mat.type()
     })
 
-    const RESCALED_HEIGHT = 500.0
+    // Resize with better quality
+    const RESCALED_HEIGHT = 800.0 // Increased from 500 for better quality
     const ratio = mat.rows / RESCALED_HEIGHT
     let resized = new cv.Mat()
     let dsize = new cv.Size(
       Math.round(mat.cols / ratio),
       Math.round(RESCALED_HEIGHT)
     )
-    cv.resize(mat, resized, dsize, 0, 0, cv.INTER_AREA)
+    cv.resize(mat, resized, dsize, 0, 0, cv.INTER_CUBIC) // Changed from INTER_AREA for better quality
     console.log('2️⃣ Image resized:', {
       newWidth: resized.cols,
       newHeight: resized.rows,
@@ -163,17 +164,19 @@ export function processImage(cv, sourceCanvas, settings = {}) {
     cv.cvtColor(resized, gray, cv.COLOR_RGBA2GRAY)
     console.log('3️⃣ Converted to grayscale')
 
+    // Apply bilateral filter instead of simple Gaussian blur for better edge preservation
     let blurred = new cv.Mat()
-    cv.GaussianBlur(gray, blurred, new cv.Size(7, 7), 0)
-    console.log('4️⃣ Applied Gaussian blur: 7x7 kernel')
+    cv.bilateralFilter(gray, blurred, 9, 75, 75)
+    console.log('4️⃣ Applied bilateral filter for edge-preserving smoothing')
 
     let kernel = cv.getStructuringElement(
       cv.MORPH_RECT,
       new cv.Size(settings.morphKernelSize, settings.morphKernelSize)
     )
     let dilated = new cv.Mat()
-    cv.morphologyEx(blurred, dilated, cv.MORPH_CLOSE, kernel)
-    console.log('5️⃣ Applied morphological closing:', {
+    // Use MORPH_GRADIENT instead of MORPH_CLOSE for better edge detection
+    cv.morphologyEx(blurred, dilated, cv.MORPH_GRADIENT, kernel)
+    console.log('5️⃣ Applied morphological gradient:', {
       kernelSize: settings.morphKernelSize
     })
 
@@ -246,7 +249,13 @@ export function processImage(cv, sourceCanvas, settings = {}) {
 
     // Enhanced final processing
     cv.cvtColor(finalMat, finalMat, cv.COLOR_RGBA2GRAY)
-    let sharpened = sharpenImage(cv, finalMat, settings)
+
+    // Apply bilateral filter before sharpening
+    let preSharpened = new cv.Mat()
+    cv.bilateralFilter(finalMat, preSharpened, 9, 75, 75)
+
+    let sharpened = sharpenImage(cv, preSharpened, settings)
+    preSharpened.delete()
 
     let result = new cv.Mat()
     cv.adaptiveThreshold(
@@ -255,9 +264,15 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       255,
       cv.ADAPTIVE_THRESH_GAUSSIAN_C,
       cv.THRESH_BINARY,
-      21,
-      15
+      settings.adaptiveBlockSize,
+      settings.adaptiveC
     )
+
+    // Apply a slight median blur to remove noise in the binary image
+    let denoised = new cv.Mat()
+    cv.medianBlur(result, denoised, 3)
+    result.delete()
+    result = denoised
 
     console.log('🏁 Processing complete')
     console.groupEnd()

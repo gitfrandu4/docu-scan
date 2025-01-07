@@ -31,11 +31,13 @@
   "settings": {
     "title": "Image Settings",
     "openMenu": "Open settings menu",
-    "minAreaRatio": "Minimum Area Ratio",
-    "maxAngleRange": "Maximum Angle Range",
-    "gaussianBlurSize": "Blur Kernel Size",
-    "sharpenWeight": "Sharpening Strength",
-    "morphKernelSize": "Morphological Kernel Size",
-    "cannyThresholds": "Edge Detection Thresholds"
+    "minAreaRatio": "Document Size",
+    "maxAngleRange": "Skew Tolerance",
+    "gaussianBlurSize": "Noise Reduction",
+    "sharpenWeight": "Text Sharpness",
+    "morphKernelSize": "Edge Enhancement",
+    "cannyThresholds": "Edge Sensitivity",
+    "adaptiveBlockSize": "Detail Level",
+    "adaptiveC": "Contrast Balance"
   }
 }

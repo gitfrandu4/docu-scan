@@ -31,11 +31,13 @@
   "settings": {
     "title": "Ajustes de Imagen",
     "openMenu": "Abrir menú de ajustes",
-    "minAreaRatio": "Ratio Mínimo de Área",
-    "maxAngleRange": "Rango Máximo de Ángulo",
-    "gaussianBlurSize": "Tamaño del Kernel de Desenfoque",
-    "sharpenWeight": "Intensidad de Nitidez",
-    "morphKernelSize": "Tamaño del Kernel Morfológico",
-    "cannyThresholds": "Umbrales de Detección de Bordes"
+    "minAreaRatio": "Tamaño del Documento",
+    "maxAngleRange": "Tolerancia de Inclinación",
+    "gaussianBlurSize": "Reducción de Ruido",
+    "sharpenWeight": "Nitidez del Texto",
+    "morphKernelSize": "Mejora de Bordes",
+    "cannyThresholds": "Sensibilidad de Bordes",
+    "adaptiveBlockSize": "Nivel de Detalle",
+    "adaptiveC": "Balance de Contraste"
   }
 }
