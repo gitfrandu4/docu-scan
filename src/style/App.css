@@ -257,11 +257,14 @@ button:active {
   position: relative;
   height: calc(100vh - 100px);
   padding-bottom: 80px;
+  overflow: auto;
 }
 
 .result-image {
   max-width: 100%;
   max-height: calc(100vh - 200px);
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -412,7 +415,9 @@ button:active {
 
 .result-content canvas.result-image {
   max-width: 100%;
-  max-height: 70vh;
+  max-height: calc(100vh - 200px);
+  width: auto !important;
+  height: auto !important;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

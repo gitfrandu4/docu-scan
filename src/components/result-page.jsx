@@ -132,27 +132,39 @@ const ResultPage = ({ croppedImage, onBack }) => {
 
   const handleEnhanceImage = () => {
     try {
-      const displayCanvas = document.createElement('canvas')
       const img = new Image()
       img.onload = () => {
-        displayCanvas.width = FIXED_WIDTH
-        displayCanvas.height = FIXED_HEIGHT
+        // Calcular las dimensiones manteniendo la proporción
+        let displayWidth, displayHeight
+        const aspectRatio = img.width / img.height
+
+        if (aspectRatio > 1) {
+          // Imagen más ancha que alta
+          displayWidth = Math.min(img.width, FIXED_WIDTH)
+          displayHeight = displayWidth / aspectRatio
+        } else {
+          // Imagen más alta que ancha
+          displayHeight = Math.min(img.height, FIXED_HEIGHT)
+          displayWidth = displayHeight * aspectRatio
+        }
+
+        // Crear el canvas con las dimensiones proporcionales
+        const displayCanvas = document.createElement('canvas')
+        displayCanvas.width = displayWidth
+        displayCanvas.height = displayHeight
+
         const ctx = displayCanvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, FIXED_WIDTH, FIXED_HEIGHT)
+        ctx.drawImage(img, 0, 0, displayWidth, displayHeight)
 
         const processedMat = processImage(window.cv, displayCanvas, {
-          // Document detection parameters (from Python reference)
-          minAreaRatio: 0.25, // Minimum area ratio for document detection
-          maxAngleRange: 40 // Maximum angle range for corners
-
-          // These parameters are now handled internally with fixed values
-          // based on the Python reference for better results
+          minAreaRatio: 0.25,
+          maxAngleRange: 40
         })
 
-        // Store the enhanced canvas for later use
+        // Store the enhanced canvas with the correct dimensions
         enhancedCanvasRef.current = document.createElement('canvas')
-        enhancedCanvasRef.current.width = FIXED_WIDTH
-        enhancedCanvasRef.current.height = FIXED_HEIGHT
+        enhancedCanvasRef.current.width = displayWidth
+        enhancedCanvasRef.current.height = displayHeight
         cv.imshow(enhancedCanvasRef.current, processedMat)
         processedMat.delete()
 
