@@ -135,6 +135,7 @@ function sharpenImage(cv, grayMat, settings) {
  */
 export function processImage(cv, sourceCanvas, settings = {}) {
   try {
+
     console.group('🔧 OpenCV Processing Steps')
 
     let mat = cv.imread(sourceCanvas)
