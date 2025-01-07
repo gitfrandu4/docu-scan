@@ -131,11 +131,10 @@ function sharpenImage(cv, grayMat, settings) {
 }
 
 /**
- * Enhanced image processing with document scanning features
+ * Enhanced image processing with document scanning features (Less Aggressive Version)
  */
 export function processImage(cv, sourceCanvas, settings = {}) {
   try {
-
     console.group('🔧 OpenCV Processing Steps')
 
     let mat = cv.imread(sourceCanvas)
@@ -146,15 +145,16 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       type: mat.type()
     })
 
-    // Resize with better quality
-    const RESCALED_HEIGHT = 800.0 // Increased from 500 for better quality
+    // Resize with "Area" interpolation for better downscaling
+    const RESCALED_HEIGHT = 800.0
     const ratio = mat.rows / RESCALED_HEIGHT
     let resized = new cv.Mat()
     let dsize = new cv.Size(
       Math.round(mat.cols / ratio),
       Math.round(RESCALED_HEIGHT)
     )
-    cv.resize(mat, resized, dsize, 0, 0, cv.INTER_CUBIC) // Changed from INTER_AREA for better quality
+    // Switch back to INTER_AREA for less artifact introduction
+    cv.resize(mat, resized, dsize, 0, 0, cv.INTER_AREA)
     console.log('2️⃣ Image resized:', {
       newWidth: resized.cols,
       newHeight: resized.rows,
@@ -165,27 +165,33 @@ export function processImage(cv, sourceCanvas, settings = {}) {
     cv.cvtColor(resized, gray, cv.COLOR_RGBA2GRAY)
     console.log('3️⃣ Converted to grayscale')
 
-    // Apply bilateral filter instead of simple Gaussian blur for better edge preservation
+    // A moderate blur that preserves edges a bit
     let blurred = new cv.Mat()
-    cv.bilateralFilter(gray, blurred, 9, 75, 75)
-    console.log('4️⃣ Applied bilateral filter for edge-preserving smoothing')
+    cv.bilateralFilter(gray, blurred, 5, 50, 50)
+    console.log('4️⃣ Applied bilateral filter with smaller kernel')
 
+    // Smaller morphological kernel
+    let kernelSize = settings.morphKernelSize < 3 ? 3 : settings.morphKernelSize
     let kernel = cv.getStructuringElement(
       cv.MORPH_RECT,
-      new cv.Size(settings.morphKernelSize, settings.morphKernelSize)
+      new cv.Size(kernelSize, kernelSize)
     )
     let dilated = new cv.Mat()
-    // Use MORPH_GRADIENT instead of MORPH_CLOSE for better edge detection
-    cv.morphologyEx(blurred, dilated, cv.MORPH_GRADIENT, kernel)
-    console.log('5️⃣ Applied morphological gradient:', {
-      kernelSize: settings.morphKernelSize
+
+    // Switch to MORPH_CLOSE or MORPH_OPEN for a less aggressive approach
+    cv.morphologyEx(blurred, dilated, cv.MORPH_CLOSE, kernel)
+    console.log('5️⃣ Applied morphological close:', {
+      kernelSize: kernelSize
     })
 
+    // Adjust Canny thresholds for less aggressive edge detection
     let edges = new cv.Mat()
-    cv.Canny(dilated, edges, settings.cannyLow, settings.cannyHigh)
-    console.log('6️⃣ Detected edges:', {
-      low: settings.cannyLow,
-      high: settings.cannyHigh
+    const lowThreshold = settings.cannyLow || 30
+    const highThreshold = settings.cannyHigh || 80
+    cv.Canny(dilated, edges, lowThreshold, highThreshold)
+    console.log('6️⃣ Detected edges (less aggressive):', {
+      low: lowThreshold,
+      high: highThreshold
     })
 
     let contours = new cv.MatVector()
@@ -201,7 +207,7 @@ export function processImage(cv, sourceCanvas, settings = {}) {
 
     // Sort contours by area
     let contourAreas = []
-    for (let i = 0; i < Math.min(5, contours.size()); i++) {
+    for (let i = 0; i < contours.size(); i++) {
       let cnt = contours.get(i)
       contourAreas.push({
         index: i,
@@ -210,7 +216,7 @@ export function processImage(cv, sourceCanvas, settings = {}) {
     }
     contourAreas.sort((a, b) => b.area - a.area)
 
-    // Find best contour with validation
+    // Find best contour
     let bestApprox = null
     for (let i = 0; i < contourAreas.length; i++) {
       let cnt = contours.get(contourAreas[i].index)
@@ -230,7 +236,7 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       approx.delete()
     }
 
-    // Perspective transform and final processing
+    // Perspective transform if found
     let finalMat
     if (bestApprox) {
       console.log('9️⃣ Applying perspective transform')
@@ -248,32 +254,43 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       finalMat = mat.clone()
     }
 
-    // Enhanced final processing
+    // Convert to grayscale again if it isn't already
     cv.cvtColor(finalMat, finalMat, cv.COLOR_RGBA2GRAY)
 
-    // Apply bilateral filter before sharpening
-    let preSharpened = new cv.Mat()
-    cv.bilateralFilter(finalMat, preSharpened, 9, 75, 75)
+    // Optionally reduce or skip sharpening, or make it milder
+    let sharpened = sharpenImage(cv, finalMat, {
+      gaussianBlurSize: settings.gaussianBlurSize || 3,
+      sharpenWeight: settings.sharpenWeight || 1.0
+    })
 
-    let sharpened = sharpenImage(cv, preSharpened, settings)
-    preSharpened.delete()
-
+    // Either do a milder threshold or skip adaptive threshold.
+    // If skipping: just keep "sharpened" as final result.
     let result = new cv.Mat()
-    cv.adaptiveThreshold(
-      sharpened,
-      result,
-      255,
-      cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-      cv.THRESH_BINARY,
-      settings.adaptiveBlockSize,
-      settings.adaptiveC
-    )
-
-    // Apply a slight median blur to remove noise in the binary image
-    let denoised = new cv.Mat()
-    cv.medianBlur(result, denoised, 3)
-    result.delete()
-    result = denoised
+    if (settings.useAdaptiveThreshold) {
+      cv.adaptiveThreshold(
+        sharpened,
+        result,
+        255,
+        cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv.THRESH_BINARY,
+        settings.adaptiveBlockSize || 11,
+        settings.adaptiveC || 2
+      )
+      // Optional mild median blur
+      let denoised = new cv.Mat()
+      cv.medianBlur(result, denoised, 3)
+      result.delete()
+      result = denoised
+    } else {
+      // Simple Otsu threshold as an alternative
+      cv.threshold(
+        sharpened,
+        result,
+        0,
+        255,
+        cv.THRESH_BINARY | cv.THRESH_OTSU
+      )
+    }
 
     console.log('🏁 Processing complete')
     console.groupEnd()
