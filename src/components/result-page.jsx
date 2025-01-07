@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MdArrowBack, MdFileDownload } from "react-icons/md";
-import { loadOpenCv, isOpenCvLoaded } from '../utils/opencv-loader';
 import { processImage } from '../utils/image-processor';
 
 const ResultPage = ({ croppedImage, onBack }) => {
@@ -15,12 +14,6 @@ const ResultPage = ({ croppedImage, onBack }) => {
       try {
         setIsProcessing(true);
         console.log('⏳ Loading OpenCV...');
-        
-        const cv = await loadOpenCv();
-        if (!cv) {
-          throw new Error('OpenCV not loaded properly');
-        }
-        console.log('✅ OpenCV loaded successfully', cv.version);
         
         const displayCanvas = document.createElement('canvas');
         const img = new Image();
