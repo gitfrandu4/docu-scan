@@ -27,5 +27,15 @@
   "backToScan": "Volver al escáner",
   "downloadResult": "Descargar imagen",
   "processingImage": "Procesando imagen",
-  "errorProcessingImage": "Error al procesar la imagen"
+  "errorProcessingImage": "Error al procesar la imagen",
+  "settings": {
+    "title": "Ajustes de Imagen",
+    "openMenu": "Abrir menú de ajustes",
+    "minAreaRatio": "Ratio Mínimo de Área",
+    "maxAngleRange": "Rango Máximo de Ángulo",
+    "gaussianBlurSize": "Tamaño del Kernel de Desenfoque",
+    "sharpenWeight": "Intensidad de Nitidez",
+    "morphKernelSize": "Tamaño del Kernel Morfológico",
+    "cannyThresholds": "Umbrales de Detección de Bordes"
+  }
 }
