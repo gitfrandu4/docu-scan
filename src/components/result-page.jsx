@@ -7,11 +7,8 @@ import Tesseract from 'tesseract.js';
 import cv from 'opencv.js';
 
 const fieldCoordinates = [
-  { name: 'DNI', x: 50, y: 50, width: 100, height: 50 },
-  { name: 'Nombre', x: 200, y: 150, width: 300, height: 50 },
-  { name: 'Apellidos', x: 200, y: 210, width: 300, height: 50 },
-  { name: 'Fecha de Nacimiento', x: 200, y: 270, width: 300, height: 50 },
-  // Agrega más campos según la estructura del DNI
+  { name: 'DNI', x: 704, y: 181, width: 475, height: 73 },
+  { name: 'APELLIDOS', x: 634, y: 297, width: 541, height: 97 },
 ];
 
 // Tamaño fijo al que se redimensionará el DNI
@@ -49,11 +46,32 @@ const ResultPage = ({ croppedImage, onBack }) => {
   };
 
   // Función para procesar cada subimagen con OCR
-  const processWithOCR = (fields) => {
+  const processWithOCR = (canvas_imgToProcess, fields) => {
+  
+    fields.forEach(({ name, x, y, width, height }) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        // Configura el canvas para el tamaño del campo
+        canvas.width = width;
+        canvas.height = height;
     
-
-    //funcion a realizar
-  };
+        // Dibuja el trozo de la imagen en el canvas
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(canvas_imgToProcess, x, y, width, height, 0, 0, width, height);
+    
+        // Pasa el canvas al OCR
+        Tesseract.recognize(canvas, "eng", {
+          logger: (info) => console.log(info),
+        })
+          .then(({ data: { text } }) => {
+            alert(`Campo: ${name}\nResultado OCR: ${text}`);
+          })
+          .catch((error) => {
+            console.error(`Error procesando OCR para el campo ${name}:`, error);
+            alert(`Error en OCR para el campo ${name}.`);
+          });
+      });
+    };
 
   const handleProcess = () => {
     if (selectedType) {
@@ -100,6 +118,11 @@ const ResultPage = ({ croppedImage, onBack }) => {
           if (oldImage) {
             resultContainer.replaceChild(displayCanvas, oldImage);
           }
+      
+          //Procesamos con el ocr
+          processWithOCR(tempCanvas, fieldCoordinates);
+      
+      
         };
       };
     } else {
