@@ -15,8 +15,17 @@
       "close": "Detener Cámara"
     }
   },
+  "errors": {
+    "streamConflict": "No se puede manejar más de 1 transmisión\nTransmitiendo actualmente: {{stream}}"
+  },
   "backToCamera": "Cambiar a cámara",
   "newImage": "Subir nueva imagen",
   "uploadImage": "Subir imagen",
-  "toggleCamera": "Alternar cámara"
+  "toggleCamera": "Alternar cámara",
+  "resultTitle": "Documento Escaneado",
+  "resultImage": "Imagen del documento escaneado",
+  "backToScan": "Volver al escáner",
+  "downloadResult": "Descargar imagen",
+  "processingImage": "Procesando imagen",
+  "errorProcessingImage": "Error al procesar la imagen"
 }

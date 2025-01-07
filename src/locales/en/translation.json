@@ -25,5 +25,7 @@
   "resultTitle": "Scanned Document",
   "resultImage": "Scanned document image",
   "backToScan": "Back to scanner",
-  "downloadResult": "Download image"
+  "downloadResult": "Download image",
+  "processingImage": "Processing image",
+  "errorProcessingImage": "Error processing image"
 }
