@@ -19,8 +19,6 @@ const ResultPage = ({ croppedImage, onBack }) => {
   const { t } = useTranslation()
   const [processedImage, setProcessedImage] = useState(null)
   const [isProcessing, setIsProcessing] = useState(true)
-  const [settings, setSettings] = useState(defaultSettings)
-
   const [selectedType, setSelectedType] = useState('')
   const [isEnhanced, setIsEnhanced] = useState(false)
   const enhancedCanvasRef = useRef(null)
