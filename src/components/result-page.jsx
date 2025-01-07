@@ -5,6 +5,7 @@ import { processImage } from '../utils/image-processor'
 import ImageSettings, { defaultSettings } from './image-settings'
 import Tesseract from 'tesseract.js'
 import cv from 'opencv.js'
+import OcrResultsModal from './ocr-results-modal'
 
 const fieldCoordinates = [
   { name: 'DNI', x: 704, y: 181, width: 475, height: 73 },
@@ -25,6 +26,10 @@ const ResultPage = ({ croppedImage, onBack }) => {
   const [isEnhanced, setIsEnhanced] = useState(false)
   const enhancedCanvasRef = useRef(null)
 
+  // New state for OCR results modal
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [ocrResults, setOcrResults] = useState([])
+
   // Función para redimensionar la imagen
   const resizeImage = (imageElement, targetWidth, targetHeight) => {
     // Crear un canvas temporal para realizar la redimensión
@@ -43,16 +48,16 @@ const ResultPage = ({ croppedImage, onBack }) => {
     // funcion a realizar
   }
 
-  // Función para procesar cada subimagen con OCR
-  const processWithOCR = (canvas_imgToProcess, fields) => {
-    fields.forEach(({ name, x, y, width, height }) => {
+  // Updated OCR processing function
+  const processWithOCR = async (canvas_imgToProcess, fields) => {
+    const results = []
+
+    for (const { name, x, y, width, height } of fields) {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
-      // Configura el canvas para el tamaño del campo
       canvas.width = width
       canvas.height = height
 
-      // Dibuja el trozo de la imagen en el canvas
       ctx.clearRect(0, 0, width, height)
       ctx.drawImage(
         canvas_imgToProcess,
@@ -66,18 +71,28 @@ const ResultPage = ({ croppedImage, onBack }) => {
         height
       )
 
-      // Pasa el canvas al OCR
-      Tesseract.recognize(canvas, 'eng', {
-        logger: (info) => console.log(info)
-      })
-        .then(({ data: { text } }) => {
-          alert(`Campo: ${name}\nResultado OCR: ${text}`)
+      try {
+        const {
+          data: { text }
+        } = await Tesseract.recognize(canvas, 'eng', {
+          logger: (info) => console.log(info)
         })
-        .catch((error) => {
-          console.error(`Error procesando OCR para el campo ${name}:`, error)
-          alert(`Error en OCR para el campo ${name}.`)
+
+        results.push({
+          field: name,
+          text: text.trim()
         })
-    })
+      } catch (error) {
+        console.error(`Error procesando OCR para el campo ${name}:`, error)
+        results.push({
+          field: name,
+          text: 'Error en el procesamiento'
+        })
+      }
+    }
+
+    setOcrResults(results)
+    setIsModalOpen(true)
   }
 
   const handleProcess = () => {
@@ -88,17 +103,8 @@ const ResultPage = ({ croppedImage, onBack }) => {
 
     if (selectedType === 'DNI') {
       if (isEnhanced && enhancedCanvasRef.current) {
-        // Use the stored enhanced canvas directly for OCR
         processWithOCR(enhancedCanvasRef.current, fieldCoordinates)
-
-        // Ensure the enhanced image stays displayed
-        const resultContainer = document.querySelector('.result-content')
-        const oldImage = resultContainer.querySelector('img.result-image')
-        if (oldImage) {
-          oldImage.src = enhancedCanvasRef.current.toDataURL('image/png')
-        }
       } else {
-        // Process the original image if not enhanced
         const imageElement = new Image()
         imageElement.src = processedImage || croppedImage
 
@@ -227,6 +233,12 @@ const ResultPage = ({ croppedImage, onBack }) => {
           </div>
         </div>
       </div>
+
+      <OcrResultsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        results={ocrResults}
+      />
     </div>
   )
 }
