@@ -3,6 +3,21 @@ import { useTranslation } from 'react-i18next'
 import { MdArrowBack, MdFileDownload } from 'react-icons/md'
 import { processImage } from '../utils/image-processor'
 import ImageSettings, { defaultSettings } from './image-settings'
+import Tesseract from 'tesseract.js';
+import cv from 'opencv.js';
+
+const fieldCoordinates = [
+  { name: 'DNI', x: 50, y: 50, width: 100, height: 50 },
+  { name: 'Nombre', x: 200, y: 150, width: 300, height: 50 },
+  { name: 'Apellidos', x: 200, y: 210, width: 300, height: 50 },
+  { name: 'Fecha de Nacimiento', x: 200, y: 270, width: 300, height: 50 },
+  // Agrega más campos según la estructura del DNI
+];
+
+// Tamaño fijo al que se redimensionará el DNI
+
+const FIXED_WIDTH = 1586;
+const FIXED_HEIGHT = 1000;
 
 const ResultPage = ({ croppedImage, onBack }) => {
   const { t } = useTranslation()
@@ -12,14 +27,86 @@ const ResultPage = ({ croppedImage, onBack }) => {
 
   const [selectedType, setSelectedType] = useState("");
 
+
+  // Función para redimensionar la imagen
+  const resizeImage = (imageElement, targetWidth, targetHeight) => {
+    // Crear un canvas temporal para realizar la redimensión
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = targetWidth;
+    tempCanvas.height = targetHeight;
+  
+    const ctx = tempCanvas.getContext('2d');
+    ctx.drawImage(imageElement, 0, 0, targetWidth, targetHeight);
+  
+    return tempCanvas.toDataURL('image/png'); // Devuelve la imagen redimensionada como Data URL
+  };
+
+   // Función para dividir la imagen en subimágenes
+  const cropFields = (imageElement, coordinates) => {
+  
+    // funcion a realizar
+    
+  };
+
+  // Función para procesar cada subimagen con OCR
+  const processWithOCR = (fields) => {
+    
+
+    //funcion a realizar
+  };
+
   const handleProcess = () => {
     if (selectedType) {
       alert(`Se va a procesar el documento como: ${selectedType}`);
     } else {
       alert("Por favor, seleccione un tipo de documento antes de procesar.");
     }
-  };
 
+    if (selectedType === "DNI") {
+      const imageElement = new Image();
+      imageElement.src = croppedImage;
+  
+      imageElement.onload = () => {
+        // Crear un canvas temporal para redimensionar la imagen
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = FIXED_WIDTH;
+        tempCanvas.height = FIXED_HEIGHT;
+  
+        const ctx = tempCanvas.getContext('2d');
+        ctx.drawImage(imageElement, 0, 0, FIXED_WIDTH, FIXED_HEIGHT);
+  
+        // Convertir el canvas a una URL de imagen
+        const resizedImage = tempCanvas.toDataURL('image/png');
+  
+        // Actualizar el estado para mostrar la nueva imagen redimensionada
+        setProcessedImage(resizedImage);
+  
+        // Si deseas reemplazar la imagen visible con un canvas:
+        const displayCanvas = document.createElement('canvas');
+        displayCanvas.width = FIXED_WIDTH;
+        displayCanvas.height = FIXED_HEIGHT;
+        displayCanvas.className = 'result-image';
+  
+        const displayCtx = displayCanvas.getContext('2d');
+        const tempImage = new Image();
+        tempImage.src = resizedImage;
+  
+        tempImage.onload = () => {
+          displayCtx.drawImage(tempImage, 0, 0, FIXED_WIDTH, FIXED_HEIGHT);
+  
+          // Reemplazar la imagen actual con el canvas en el DOM
+          const resultContainer = document.querySelector('.result-content');
+          const oldImage = resultContainer.querySelector('img.result-image');
+          if (oldImage) {
+            resultContainer.replaceChild(displayCanvas, oldImage);
+          }
+        };
+      };
+    } else {
+      alert("Por favor, seleccione un tipo de documento antes de procesar.");
+    }
+
+  };
 
   useEffect(() => {
     if (croppedImage) {
