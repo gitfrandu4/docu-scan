@@ -27,10 +27,10 @@ const App = () => {
 
   const modelName = "yolov11n";
 
-  const handleDetection = (boxes_data, ratios, modelWidth, modelHeight) => {
+  const handleDetection = (boxes_data, scores_data, modelWidth, modelHeight) => {
     console.group('🎯 Cropping Process');
     if (boxes_data.length > 0) {
-      // Get the first detection
+      // Get the first detection with highest confidence
       const [y1, x1, y2, x2] = boxes_data.slice(0, 4);
       console.log('📦 Raw detection box:', { y1, x1, y2, x2 });
       
@@ -79,21 +79,20 @@ const App = () => {
         return;
       }
 
-      // Convert coordinates from model space (640x640) to original space
-      const maxSize = Math.max(sourceWidth, sourceHeight);
-      const scale = modelWidth / maxSize;
+      // Calculate scale factors
+      const aspectRatio = sourceWidth / sourceHeight;
+      let scale;
+      if (aspectRatio > 1) {
+        scale = modelWidth / sourceWidth;
+      } else {
+        scale = modelHeight / sourceHeight;
+      }
 
-      // Unscale coordinates from 640x640 to original padded size
-      const y1_padded = y1 / scale;
-      const x1_padded = x1 / scale;
-      const y2_padded = y2 / scale;
-      const x2_padded = x2 / scale;
-
-      // Clamp to actual image dimensions (removing padding)
-      const actualX1 = Math.max(0, Math.min(sourceWidth, x1_padded));
-      const actualY1 = Math.max(0, Math.min(sourceHeight, y1_padded));
-      const actualX2 = Math.max(0, Math.min(sourceWidth, x2_padded));
-      const actualY2 = Math.max(0, Math.min(sourceHeight, y2_padded));
+      // Convert coordinates from model space to original space
+      const actualX1 = Math.max(0, Math.min(sourceWidth, x1 / scale));
+      const actualY1 = Math.max(0, Math.min(sourceHeight, y1 / scale));
+      const actualX2 = Math.max(0, Math.min(sourceWidth, x2 / scale));
+      const actualY2 = Math.max(0, Math.min(sourceHeight, y2 / scale));
 
       console.log('🎯 Final crop coordinates:', {
         x1: actualX1,
