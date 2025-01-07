@@ -105,9 +105,13 @@ const App = () => {
 
       // Create a temporary canvas to crop the image
       const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
+      const tempCtx = tempCanvas.getContext('2d', { 
+        alpha: false,
+        willReadFrequently: true
+      });
       
-      // Set canvas size to the crop size
+      // Set canvas size to the crop size with higher resolution
+      const scaleFactor = 2; // Increase resolution
       const cropWidth = actualX2 - actualX1;
       const cropHeight = actualY2 - actualY1;
       
@@ -119,11 +123,19 @@ const App = () => {
         return;
       }
 
-      tempCanvas.width = cropWidth;
-      tempCanvas.height = cropHeight;
+      tempCanvas.width = cropWidth * scaleFactor;
+      tempCanvas.height = cropHeight * scaleFactor;
       
       try {
         console.log('🎨 Drawing crop to canvas...');
+        
+        // Configure context for better quality
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = 'high';
+        
+        // Scale up before drawing
+        tempCtx.scale(scaleFactor, scaleFactor);
+        
         // Draw the cropped portion
         tempCtx.drawImage(
           sourceElement,
@@ -133,8 +145,11 @@ const App = () => {
           cropWidth, cropHeight // Same size in destination
         );
         
-        // Convert to base64
-        const croppedDataUrl = tempCanvas.toDataURL('image/png');
+        // Reset scale
+        tempCtx.scale(1/scaleFactor, 1/scaleFactor);
+        
+        // Convert to base64 with maximum quality
+        const croppedDataUrl = tempCanvas.toDataURL('image/png', 1.0);
         console.log('✅ Successfully created cropped image');
         setCroppedImage(croppedDataUrl);
         // Reset the crop flag after successful crop

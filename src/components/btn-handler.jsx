@@ -47,20 +47,26 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
     
     const canvas = tempCanvasRef.current;
     
-    // Set canvas size to match video dimensions
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Set canvas size to match video dimensions but with higher resolution
+    canvas.width = video.videoWidth * 2;  // Double the resolution
+    canvas.height = video.videoHeight * 2;
     
-    // Draw the current frame to canvas
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Draw the current frame to canvas with image smoothing optimized
+    const ctx = canvas.getContext('2d', { alpha: false });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    
+    // Scale up and draw
+    ctx.scale(2, 2);  // Scale to match the increased canvas size
+    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    ctx.scale(0.5, 0.5);  // Reset scale
     
     // Stop the video stream and hide video element
     webcam.close(cameraRef.current);
     video.style.display = "none";
     setStreaming("image");
     
-    // Convert to blob and create URL
+    // Convert to blob and create URL with higher quality
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const img = imageRef.current;
@@ -75,7 +81,7 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
           handleDetection(boxes_data, ratios, modelWidth, modelHeight);
         });
       };
-    }, 'image/jpeg', 0.95);
+    }, 'image/jpeg', 1.0);  // Máxima calidad JPEG
   };
 
   if (!isModelLoaded) {
