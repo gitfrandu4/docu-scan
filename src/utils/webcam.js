@@ -13,8 +13,8 @@ export class Webcam {
           audio: false,
           video: {
             facingMode: "environment",
-            width: { ideal: 9999 }, // Resolución ideal en píxeles (4K)
-            height: { ideal: 9999 },
+            width: { ideal: 999 }, // Resolución ideal en píxeles (4K)
+            height: { ideal: 999 },
           },
         })
         .then((stream) => {
