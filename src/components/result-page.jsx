@@ -10,6 +10,25 @@ const ResultPage = ({ croppedImage, onBack }) => {
   const [isProcessing, setIsProcessing] = useState(true)
   const [settings, setSettings] = useState(defaultSettings)
 
+  const [selectedType, setSelectedType] = useState("");
+
+  const handleProcess = () => {
+    if (selectedType) {
+      alert(`Se va a procesar el documento como: ${selectedType}`);
+    } else {
+      alert("Por favor, seleccione un tipo de documento antes de procesar.");
+    }
+  };
+
+
+  useEffect(() => {
+    if (croppedImage) {
+      setProcessedImage(croppedImage);
+      setIsProcessing(false);
+    }
+  }, [croppedImage]);
+  
+  /*
   useEffect(() => {
     const processImageWithOpenCV = async () => {
       console.group('🔄 Image Processing Flow')
@@ -88,6 +107,8 @@ const ResultPage = ({ croppedImage, onBack }) => {
     }
   }, [croppedImage, settings])
 
+  */
+
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = processedImage || croppedImage
@@ -97,6 +118,51 @@ const ResultPage = ({ croppedImage, onBack }) => {
     document.body.removeChild(link)
   }
 
+  return (
+    <div className="result-page">
+      <div className="result-header">
+        <button onClick={onBack} className="back-button">
+          <MdArrowBack size={24} />
+        </button>
+        <h2>Resultado</h2>
+        <button
+          onClick={() => {
+            const link = document.createElement("a");
+            link.href = croppedImage;
+            link.download = "resultado.png";
+            link.click();
+          }}
+          className="download-button"
+        >
+          <MdFileDownload size={24} />
+        </button>
+      </div>
+      <div className="result-content">
+        <img
+          src={croppedImage}
+          alt="Resultado"
+          className="result-image"
+        />
+        <div className="action-section">
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="document-type-selector"
+          >
+            <option value="" disabled>Seleccione tipo de documento</option>
+            <option value="DNI">DNI</option>
+            <option value="Permiso de conducir">Permiso de conducir</option>
+            <option value="Documento genérico">Documento genérico</option>
+          </select>
+          <button onClick={handleProcess} className="process-button">
+            Procesar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
+  /*
   return (
     <div className="result-page">
       <div className="result-header">
@@ -133,6 +199,8 @@ const ResultPage = ({ croppedImage, onBack }) => {
       <ImageSettings settings={settings} onSettingsChange={setSettings} />
     </div>
   )
+
+  */
 }
 
 export default ResultPage

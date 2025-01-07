@@ -252,11 +252,17 @@ button:active {
 }
 
 .result-content {
-  flex: 1;
+  /*flex: 1;*/ /* Para que se muestre más pegada la imagen al header */
+
+  flex: 0.8;
   display: flex;
-  justify-content: center;
+  /* Ponemos en columna para apilar imagen y action-section */
+  flex-direction: column;
+  /* Centrado horizontal */
   align-items: center;
-  padding: 20px 0;
+  justify-content: center;
+  /* Espacio entre imagen y action-section */
+  gap: 20px;
 }
 
 .result-image {
@@ -265,6 +271,59 @@ button:active {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-section {
+  /* Mostramos select y botón en la misma fila */
+  display: flex;
+  flex-direction: row;
+  /* Centrado horizontal */
+  justify-content: center;
+  align-items: center;
+  /* Espacio entre el select y el botón */
+  gap: 15px;
+  /* Algo de margen para separarlo aún más de la imagen, si deseas */
+  margin-top: 10px;
+}
+
+.document-type-selector {
+  padding: 12px;
+  font-size: 18px; /* Aumenta el tamaño del texto */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  width: 80%; /* Asegura que ocupe un ancho adecuado */
+  max-width: 400px; /* Máximo ancho */
+  text-align: left; /* Asegura el texto alineado al seleccionar */
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.document-type-selector:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.process-button {
+  padding: 12px 15px; /* Ajusta el tamaño del botón */
+  font-size: 18px; /* Tamaño del texto */
+  color: white;
+  background-color: #007aff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 40%; /* Igual que el menú desplegable */
+  max-width: 300px; /* Máximo ancho del botón */
+  text-align: center;
+}
+
+.process-button:hover {
+  background-color: #005bb5;
+}
+
+.process-button:active {
+  transform: scale(0.98); /* Efecto al pulsar */
 }
 
 .back-button, .download-button {
