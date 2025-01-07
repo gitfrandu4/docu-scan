@@ -40,11 +40,6 @@ const ResultPage = ({ croppedImage, onBack }) => {
     return tempCanvas.toDataURL('image/png') // Devuelve la imagen redimensionada como Data URL
   }
 
-  // Función para dividir la imagen en subimágenes
-  const cropFields = (imageElement, coordinates) => {
-    // funcion a realizar
-  }
-
   // Updated OCR processing function
   const processWithOCR = async (canvas_imgToProcess, fields) => {
     const results = []
