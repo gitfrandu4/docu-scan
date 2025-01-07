@@ -120,7 +120,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
 
   const handleProcess = () => {
     if (!selectedType) {
-      alert('Por favor, seleccione un tipo de documento antes de procesar.')
+      alert(t('result.process.selectFirst'))
       return
     }
 
@@ -223,7 +223,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
         <button onClick={onBack} className="back-button">
           <MdArrowBack size={24} />
         </button>
-        <h2>Resultado</h2>
+        <h2>{t('result.title')}</h2>
         <button onClick={handleDownload} className="download-button">
           <MdFileDownload size={24} />
         </button>
@@ -231,7 +231,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
       <div className="result-content">
         <img
           src={processedImage || croppedImage}
-          alt="Resultado"
+          alt={t('result.title')}
           className="result-image"
         />
         <div className="action-section">
@@ -241,7 +241,9 @@ const ResultPage = ({ croppedImage, onBack }) => {
               className={`enhance-button ${isEnhanced ? 'enhanced' : ''}`}
               disabled={isEnhanced}
               title={
-                isEnhanced ? 'Imagen ya mejorada' : 'Mejorar imagen con IA'
+                isEnhanced
+                  ? t('result.enhanceImage.alreadyEnhanced')
+                  : t('result.enhanceImage.button')
               }
             >
               <MdAutoFixHigh size={20} />
@@ -253,17 +255,21 @@ const ResultPage = ({ croppedImage, onBack }) => {
               className="document-type-selector"
             >
               <option value="" disabled>
-                Seleccione tipo de documento
+                {t('result.documentType.select')}
               </option>
-              <option value="DNI">DNI</option>
-              <option value="Documento genérico">Documento genérico</option>
+              <option value="DNI">{t('result.documentType.dni')}</option>
+              <option value="Documento genérico">
+                {t('result.documentType.generic')}
+              </option>
             </select>
             <button
               onClick={handleProcess}
               className="process-button"
               disabled={isProcessing}
             >
-              {isProcessing ? 'Procesando...' : 'Procesar'}
+              {isProcessing
+                ? t('result.process.processing')
+                : t('result.process.button')}
             </button>
           </div>
         </div>

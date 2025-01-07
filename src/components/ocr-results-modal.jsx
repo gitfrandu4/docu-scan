@@ -1,17 +1,18 @@
 import React from 'react'
 import { MdContentCopy, MdClose } from 'react-icons/md'
+import { useTranslation } from 'react-i18next'
 
 const OcrResultsModal = ({ isOpen, onClose, results }) => {
+  const { t } = useTranslation()
   if (!isOpen) return null
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text).then(
       () => {
-        // Could add a toast notification here
-        console.log('Texto copiado')
+        console.log(t('ocr.copySuccess'))
       },
       (err) => {
-        console.error('Error al copiar:', err)
+        console.error(t('ocr.copyError'), err)
       }
     )
   }
@@ -20,7 +21,7 @@ const OcrResultsModal = ({ isOpen, onClose, results }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h3>Resultados OCR</h3>
+          <h3>{t('ocr.title')}</h3>
           <button onClick={onClose} className="modal-close-button">
             <MdClose size={24} />
           </button>
@@ -34,7 +35,7 @@ const OcrResultsModal = ({ isOpen, onClose, results }) => {
                 <button
                   onClick={() => handleCopy(result.text)}
                   className="copy-button"
-                  title="Copiar texto"
+                  title={t('ocr.copyButton')}
                 >
                   <MdContentCopy size={20} />
                 </button>
