@@ -141,47 +141,48 @@ export function processImage(cv, sourceCanvas, settings = {}) {
     let mat = cv.imread(sourceCanvas)
     console.log('1️⃣ Image loaded')
 
-    // Convert to grayscale and enhance contrast
+    // Convert to grayscale and enhance initial contrast
     let gray = new cv.Mat()
     cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY)
-
-    // Enhance contrast using CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    let clahe = new cv.Mat()
-    let equalizedGray = new cv.Mat()
-    cv.convertScaleAbs(gray, clahe, 1.5, 0) // Increase contrast
-    cv.equalizeHist(clahe, equalizedGray) // Equalize histogram
-    console.log('2️⃣ Enhanced contrast')
+    let enhanced = new cv.Mat()
+    cv.convertScaleAbs(gray, enhanced, 1.2, 10)
+    console.log('2️⃣ Initial contrast enhancement')
 
     // Apply bilateral filter to preserve edges while removing noise
-    let bilateral = new cv.Mat()
-    cv.bilateralFilter(equalizedGray, bilateral, 9, 75, 75)
+    let denoised = new cv.Mat()
+    cv.bilateralFilter(enhanced, denoised, 9, 75, 75)
     console.log('3️⃣ Applied bilateral filter')
 
-    // Morphological operations to clean up the image
-    let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(9, 9))
-    let dilated = new cv.Mat()
-    cv.morphologyEx(bilateral, dilated, cv.MORPH_CLOSE, kernel)
-    console.log('4️⃣ Applied morphological operations')
+    // Initial light threshold to help with edge detection
+    let preThresh = new cv.Mat()
+    cv.threshold(denoised, preThresh, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
 
-    // Edge detection with careful thresholds
+    // Edge detection
     let edges = new cv.Mat()
-    cv.Canny(dilated, edges, 0, 84)
-    console.log('5️⃣ Detected edges')
+    cv.Canny(preThresh, edges, 50, 150)
 
-    // Find contours and detect document
+    // Connect edges
+    let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3))
+    let dilated = new cv.Mat()
+    cv.dilate(edges, dilated, kernel)
+    cv.morphologyEx(dilated, dilated, cv.MORPH_CLOSE, kernel)
+    console.log('4️⃣ Enhanced edges')
+
+    // Find contours
     let contours = new cv.MatVector()
     let hierarchy = new cv.Mat()
     cv.findContours(
-      edges,
+      dilated,
       contours,
       hierarchy,
       cv.RETR_EXTERNAL,
       cv.CHAIN_APPROX_SIMPLE
     )
 
-    // Find the document contour
-    let documentContour = null
+    // Find the largest contour and try to get corners
     let maxArea = 0
+    let largestContour = null
+    let documentCorners = null
     const imgArea = mat.cols * mat.rows
 
     for (let i = 0; i < contours.size(); i++) {
@@ -189,6 +190,10 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       const area = cv.contourArea(contour)
 
       if (area > maxArea && area > imgArea * settings.minAreaRatio) {
+        maxArea = area
+        largestContour = contour
+
+        // Try to get corners
         const perimeter = cv.arcLength(contour, true)
         const approx = new cv.Mat()
         cv.approxPolyDP(contour, approx, 0.02 * perimeter, true)
@@ -202,12 +207,9 @@ export function processImage(cv, sourceCanvas, settings = {}) {
             })
           }
 
-          const sortedPoints = sortPoints(points)
-          const angleRange = calculateAngleRange(sortedPoints)
-
+          const angleRange = calculateAngleRange(points)
           if (angleRange < settings.maxAngleRange) {
-            maxArea = area
-            documentContour = approx
+            documentCorners = approx
           } else {
             approx.delete()
           }
@@ -218,33 +220,48 @@ export function processImage(cv, sourceCanvas, settings = {}) {
     }
 
     let result = new cv.Mat()
-    if (documentContour) {
-      console.log('6️⃣ Found document contour')
+    if (documentCorners || largestContour) {
+      console.log('5️⃣ Found document contour')
 
-      // Get corners and apply perspective transform
-      const points = []
-      for (let i = 0; i < 4; i++) {
-        points.push({
-          x: documentContour.data32S[i * 2],
-          y: documentContour.data32S[i * 2 + 1]
-        })
+      let points = []
+      if (documentCorners) {
+        // Use the found corners
+        for (let i = 0; i < 4; i++) {
+          points.push({
+            x: documentCorners.data32S[i * 2],
+            y: documentCorners.data32S[i * 2 + 1]
+          })
+        }
+      } else {
+        // Fallback to minimum area rectangle
+        let rotatedRect = cv.minAreaRect(largestContour)
+        let vertices = cv.boxPoints(rotatedRect)
+        for (let i = 0; i < 4; i++) {
+          points.push({
+            x: vertices.data32F[i * 2],
+            y: vertices.data32F[i * 2 + 1]
+          })
+        }
       }
-      const sortedPoints = sortPoints(points)
-      result = fourPointTransform(cv, equalizedGray, sortedPoints)
-      console.log('7️⃣ Applied perspective transform')
 
-      // Enhanced post-processing pipeline for text clarity
-      // 1. Apply unsharp masking for sharper text
-      let blurred = new cv.Mat()
-      let sharpened = new cv.Mat()
-      cv.GaussianBlur(result, blurred, new cv.Size(0, 0), 3)
-      cv.addWeighted(result, 2.0, blurred, -0.5, 0, sharpened)
+      // Apply perspective transform
+      const sortedPoints = sortPoints(points)
+      result = fourPointTransform(cv, enhanced, sortedPoints)
+      console.log('6️⃣ Applied perspective transform')
+
+      // Enhanced text processing pipeline
+      // 1. Apply Laplacian-based unsharp mask
+      let lap = new cv.Mat()
+      let sharp = new cv.Mat()
+      cv.Laplacian(result, lap, cv.CV_8U, 3, 1, 0, cv.BORDER_DEFAULT)
+      cv.subtract(result, lap, sharp)
+      console.log('7️⃣ Applied unsharp mask')
 
       // 2. Enhance local contrast
       let localContrast = new cv.Mat()
-      cv.convertScaleAbs(sharpened, localContrast, 1.3, 15)
+      cv.convertScaleAbs(sharp, localContrast, 1.2, 10)
 
-      // 3. Apply Otsu's thresholding for better binarization
+      // 3. Otsu's binarization
       let thresh = new cv.Mat()
       cv.threshold(
         localContrast,
@@ -254,13 +271,16 @@ export function processImage(cv, sourceCanvas, settings = {}) {
         cv.THRESH_BINARY + cv.THRESH_OTSU
       )
 
-      // 4. Clean up noise and enhance text
+      // 4. Morphological cleanup
       let cleanKernel = cv.getStructuringElement(
         cv.MORPH_RECT,
         new cv.Size(2, 2)
       )
       let cleaned = new cv.Mat()
-      cv.morphologyEx(thresh, cleaned, cv.MORPH_CLOSE, cleanKernel)
+
+      // Open to remove noise, then close to connect text
+      cv.morphologyEx(thresh, cleaned, cv.MORPH_OPEN, cleanKernel)
+      cv.morphologyEx(cleaned, cleaned, cv.MORPH_CLOSE, cleanKernel)
 
       // 5. Final adaptive threshold for consistent text
       cv.adaptiveThreshold(
@@ -275,28 +295,28 @@ export function processImage(cv, sourceCanvas, settings = {}) {
       console.log('8️⃣ Enhanced text clarity')
 
       // Cleanup
-      blurred.delete()
-      sharpened.delete()
+      lap.delete()
+      sharp.delete()
       localContrast.delete()
       thresh.delete()
       cleaned.delete()
       cleanKernel.delete()
     } else {
       console.log('⚠️ No document found, processing full image')
-      equalizedGray.copyTo(result)
+      enhanced.copyTo(result)
     }
 
     // Cleanup
     mat.delete()
     gray.delete()
-    clahe.delete()
-    equalizedGray.delete()
-    bilateral.delete()
-    dilated.delete()
+    enhanced.delete()
+    denoised.delete()
+    preThresh.delete()
     edges.delete()
+    dilated.delete()
     kernel.delete()
     hierarchy.delete()
-    if (documentContour) documentContour.delete()
+    if (documentCorners) documentCorners.delete()
     for (let i = 0; i < contours.size(); i++) {
       contours.get(i).delete()
     }
