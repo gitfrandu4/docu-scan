@@ -126,22 +126,6 @@ const ButtonHandler = ({ imageRef, cameraRef, canvasRef, model, isModelLoaded, s
           >
             <MdCameraAlt size={24} />
           </button>
-          <button
-            onClick={() => {
-              if (streaming === "camera") {
-                webcam.close(cameraRef.current);
-                cameraRef.current.style.display = "none";
-                setStreaming(null);
-              } else {
-                webcam.open(cameraRef.current);
-                cameraRef.current.style.display = "block";
-                setStreaming("camera");
-              }
-            }}
-            title={t('toggleCamera')}
-          >
-            <MdCameraswitch size={24} />
-          </button>
         </>
       )}
 
