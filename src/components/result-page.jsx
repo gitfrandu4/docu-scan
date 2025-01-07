@@ -95,28 +95,68 @@ const ResultPage = ({ croppedImage, onBack }) => {
     setIsModalOpen(true)
   }
 
+  // Process entire document with OCR
+  const processFullDocument = async (canvas) => {
+    try {
+      setIsProcessing(true)
+      const {
+        data: { text }
+      } = await Tesseract.recognize(canvas, 'eng', {
+        logger: (info) => console.log(info)
+      })
+
+      setOcrResults([
+        {
+          field: 'Texto Completo',
+          text: text.trim()
+        }
+      ])
+      setIsModalOpen(true)
+    } catch (error) {
+      console.error('Error procesando OCR del documento:', error)
+      setOcrResults([
+        {
+          field: 'Error',
+          text: 'Error al procesar el documento'
+        }
+      ])
+      setIsModalOpen(true)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   const handleProcess = () => {
     if (!selectedType) {
       alert('Por favor, seleccione un tipo de documento antes de procesar.')
       return
     }
 
-    if (selectedType === 'DNI') {
-      if (isEnhanced && enhancedCanvasRef.current) {
-        processWithOCR(enhancedCanvasRef.current, fieldCoordinates)
-      } else {
-        const imageElement = new Image()
-        imageElement.src = processedImage || croppedImage
+    const canvas =
+      isEnhanced && enhancedCanvasRef.current
+        ? enhancedCanvasRef.current
+        : (() => {
+            const tempCanvas = document.createElement('canvas')
+            const img = new Image()
+            img.src = processedImage || croppedImage
 
-        imageElement.onload = () => {
-          const tempCanvas = document.createElement('canvas')
-          tempCanvas.width = FIXED_WIDTH
-          tempCanvas.height = FIXED_HEIGHT
-          const ctx = tempCanvas.getContext('2d')
-          ctx.drawImage(imageElement, 0, 0, FIXED_WIDTH, FIXED_HEIGHT)
-          processWithOCR(tempCanvas, fieldCoordinates)
-        }
-      }
+            if (selectedType === 'DNI') {
+              tempCanvas.width = FIXED_WIDTH
+              tempCanvas.height = FIXED_HEIGHT
+            } else {
+              tempCanvas.width = img.width
+              tempCanvas.height = img.height
+            }
+
+            const ctx = tempCanvas.getContext('2d')
+            ctx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
+            return tempCanvas
+          })()
+
+    if (selectedType === 'DNI') {
+      processWithOCR(canvas, fieldCoordinates)
+    } else if (selectedType === 'Documento genérico') {
+      processFullDocument(canvas)
     }
   }
 
@@ -224,11 +264,14 @@ const ResultPage = ({ croppedImage, onBack }) => {
                 Seleccione tipo de documento
               </option>
               <option value="DNI">DNI</option>
-              <option value="Permiso de conducir">Permiso de conducir</option>
               <option value="Documento genérico">Documento genérico</option>
             </select>
-            <button onClick={handleProcess} className="process-button">
-              Procesar
+            <button
+              onClick={handleProcess}
+              className="process-button"
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Procesando...' : 'Procesar'}
             </button>
           </div>
         </div>
