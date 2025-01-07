@@ -1,23 +1,106 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { MdArrowBack, MdFileDownload } from "react-icons/md";
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { MdArrowBack, MdFileDownload } from 'react-icons/md'
+import { processImage } from '../utils/image-processor'
+import ImageSettings, { defaultSettings } from './image-settings'
 
 const ResultPage = ({ croppedImage, onBack }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
+  const [processedImage, setProcessedImage] = useState(null)
+  const [isProcessing, setIsProcessing] = useState(true)
+  const [settings, setSettings] = useState(defaultSettings)
+
+  useEffect(() => {
+    const processImageWithOpenCV = async () => {
+      console.group('🔄 Image Processing Flow')
+      try {
+        setIsProcessing(true)
+        console.log('⏳ Loading OpenCV...')
+
+        const displayCanvas = document.createElement('canvas')
+        const img = new Image()
+
+        img.onload = () => {
+          console.log('📸 Image loaded:', {
+            width: img.width,
+            height: img.height,
+            src: croppedImage.substring(0, 50) + '...'
+          })
+
+          displayCanvas.width = img.width
+          displayCanvas.height = img.height
+          const ctx = displayCanvas.getContext('2d')
+          ctx.drawImage(img, 0, 0)
+          console.log('🎨 Image drawn to canvas')
+
+          try {
+            console.log(
+              '🔍 Starting OpenCV processing with settings:',
+              settings
+            )
+            const processedMat = processImage(
+              window.cv,
+              displayCanvas,
+              settings
+            )
+            console.log('✨ OpenCV processing complete')
+
+            cv.imshow(displayCanvas, processedMat)
+            console.log('🖼️ Processed image shown on canvas')
+
+            const dataUrl = displayCanvas.toDataURL('image/png')
+            console.log('💾 Canvas converted to data URL')
+            setProcessedImage(dataUrl)
+
+            processedMat.delete()
+            console.log('🧹 OpenCV resources cleaned up')
+          } catch (cvError) {
+            console.error('❌ OpenCV processing error:', cvError)
+            setProcessedImage(croppedImage)
+          }
+
+          setIsProcessing(false)
+        }
+
+        img.onerror = (error) => {
+          console.error('❌ Error loading image:', error)
+          setProcessedImage(croppedImage)
+          setIsProcessing(false)
+        }
+
+        img.src = croppedImage
+        console.log('🔄 Image source set, waiting for load...')
+      } catch (error) {
+        console.error('❌ Fatal error in processing:', error)
+        setProcessedImage(croppedImage)
+        setIsProcessing(false)
+      }
+      console.groupEnd()
+    }
+
+    if (croppedImage) {
+      processImageWithOpenCV()
+    }
+
+    return () => {
+      // Cleanup on unmount
+      setProcessedImage(null)
+    }
+  }, [croppedImage, settings])
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = croppedImage;
-    link.download = 'docuscan-result.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    const link = document.createElement('a')
+    link.href = processedImage || croppedImage
+    link.download = 'docuscan-result.png'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <div className="result-page">
       <div className="result-header">
-        <button 
+        <button
           onClick={onBack}
           title={t('backToScan')}
           className="back-button"
@@ -34,14 +117,22 @@ const ResultPage = ({ croppedImage, onBack }) => {
         </button>
       </div>
       <div className="result-content">
-        <img 
-          src={croppedImage} 
-          alt={t('resultImage')}
-          className="result-image"
-        />
+        {isProcessing ? (
+          <div className="processing-indicator">{t('processingImage')}...</div>
+        ) : processedImage ? (
+          <img
+            src={processedImage}
+            alt={t('resultImage')}
+            className="result-image"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+        ) : (
+          <div className="error-message">{t('errorProcessingImage')}</div>
+        )}
       </div>
+      <ImageSettings settings={settings} onSettingsChange={setSettings} />
     </div>
-  );
-};
+  )
+}
 
-export default ResultPage; 
+export default ResultPage

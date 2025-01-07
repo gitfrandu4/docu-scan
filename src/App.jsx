@@ -23,7 +23,7 @@ const App = () => {
 
   const imageRef = useRef(null);
   const cameraRef = useRef(null);
-  const canvasRef = useRef(null);
+  const canvasRef = useRef(null); 
 
   const modelName = "yolov11n";
 

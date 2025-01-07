@@ -15,8 +15,29 @@
       "close": "Detener Cámara"
     }
   },
+  "errors": {
+    "streamConflict": "No se puede manejar más de 1 transmisión\nTransmitiendo actualmente: {{stream}}"
+  },
   "backToCamera": "Cambiar a cámara",
   "newImage": "Subir nueva imagen",
   "uploadImage": "Subir imagen",
-  "toggleCamera": "Alternar cámara"
+  "toggleCamera": "Alternar cámara",
+  "resultTitle": "Documento Escaneado",
+  "resultImage": "Imagen del documento escaneado",
+  "backToScan": "Volver al escáner",
+  "downloadResult": "Descargar imagen",
+  "processingImage": "Procesando imagen",
+  "errorProcessingImage": "Error al procesar la imagen",
+  "settings": {
+    "title": "Ajustes de Imagen",
+    "openMenu": "Abrir menú de ajustes",
+    "minAreaRatio": "Tamaño del Documento",
+    "maxAngleRange": "Tolerancia de Inclinación",
+    "gaussianBlurSize": "Reducción de Ruido",
+    "sharpenWeight": "Nitidez del Texto",
+    "morphKernelSize": "Mejora de Bordes",
+    "cannyThresholds": "Sensibilidad de Bordes",
+    "adaptiveBlockSize": "Nivel de Detalle",
+    "adaptiveC": "Balance de Contraste"
+  }
 }

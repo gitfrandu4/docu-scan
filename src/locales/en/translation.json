@@ -25,5 +25,19 @@
   "resultTitle": "Scanned Document",
   "resultImage": "Scanned document image",
   "backToScan": "Back to scanner",
-  "downloadResult": "Download image"
+  "downloadResult": "Download image",
+  "processingImage": "Processing image",
+  "errorProcessingImage": "Error processing image",
+  "settings": {
+    "title": "Image Settings",
+    "openMenu": "Open settings menu",
+    "minAreaRatio": "Document Size",
+    "maxAngleRange": "Skew Tolerance",
+    "gaussianBlurSize": "Noise Reduction",
+    "sharpenWeight": "Text Sharpness",
+    "morphKernelSize": "Edge Enhancement",
+    "cannyThresholds": "Edge Sensitivity",
+    "adaptiveBlockSize": "Detail Level",
+    "adaptiveC": "Contrast Balance"
+  }
 }
