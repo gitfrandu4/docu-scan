@@ -131,173 +131,228 @@ function sharpenImage(cv, grayMat, settings) {
 }
 
 /**
- * Enhanced image processing with document scanning features
+ * Enhanced image processing with document scanning features (Less Aggressive Version)
  */
 export function processImage(cv, sourceCanvas, settings = {}) {
   try {
-
     console.group('🔧 OpenCV Processing Steps')
 
+    // Load image
     let mat = cv.imread(sourceCanvas)
-    console.log('1️⃣ Image loaded to Mat:', {
-      width: mat.cols,
-      height: mat.rows,
-      channels: mat.channels(),
-      type: mat.type()
-    })
+    console.log('1️⃣ Image loaded')
 
-    // Resize with better quality
-    const RESCALED_HEIGHT = 800.0 // Increased from 500 for better quality
-    const ratio = mat.rows / RESCALED_HEIGHT
-    let resized = new cv.Mat()
-    let dsize = new cv.Size(
-      Math.round(mat.cols / ratio),
-      Math.round(RESCALED_HEIGHT)
-    )
-    cv.resize(mat, resized, dsize, 0, 0, cv.INTER_CUBIC) // Changed from INTER_AREA for better quality
-    console.log('2️⃣ Image resized:', {
-      newWidth: resized.cols,
-      newHeight: resized.rows,
-      ratio: ratio
-    })
-
+    // Convert to grayscale and enhance initial contrast
     let gray = new cv.Mat()
-    cv.cvtColor(resized, gray, cv.COLOR_RGBA2GRAY)
-    console.log('3️⃣ Converted to grayscale')
+    cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY)
+    let enhanced = new cv.Mat()
+    cv.convertScaleAbs(gray, enhanced, 1.2, 10)
+    console.log('2️⃣ Initial contrast enhancement')
 
-    // Apply bilateral filter instead of simple Gaussian blur for better edge preservation
-    let blurred = new cv.Mat()
-    cv.bilateralFilter(gray, blurred, 9, 75, 75)
-    console.log('4️⃣ Applied bilateral filter for edge-preserving smoothing')
+    // Apply bilateral filter to preserve edges while removing noise
+    let denoised = new cv.Mat()
+    cv.bilateralFilter(enhanced, denoised, 9, 75, 75)
+    console.log('3️⃣ Applied bilateral filter')
 
-    let kernel = cv.getStructuringElement(
-      cv.MORPH_RECT,
-      new cv.Size(settings.morphKernelSize, settings.morphKernelSize)
-    )
-    let dilated = new cv.Mat()
-    // Use MORPH_GRADIENT instead of MORPH_CLOSE for better edge detection
-    cv.morphologyEx(blurred, dilated, cv.MORPH_GRADIENT, kernel)
-    console.log('5️⃣ Applied morphological gradient:', {
-      kernelSize: settings.morphKernelSize
-    })
+    // Initial light threshold to help with edge detection
+    let preThresh = new cv.Mat()
+    cv.threshold(denoised, preThresh, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
 
+    // Edge detection
     let edges = new cv.Mat()
-    cv.Canny(dilated, edges, settings.cannyLow, settings.cannyHigh)
-    console.log('6️⃣ Detected edges:', {
-      low: settings.cannyLow,
-      high: settings.cannyHigh
-    })
+    cv.Canny(preThresh, edges, 50, 150)
 
+    // Connect edges
+    let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3))
+    let dilated = new cv.Mat()
+    cv.dilate(edges, dilated, kernel)
+    cv.morphologyEx(dilated, dilated, cv.MORPH_CLOSE, kernel)
+    console.log('4️⃣ Enhanced edges')
+
+    // Find contours
     let contours = new cv.MatVector()
     let hierarchy = new cv.Mat()
     cv.findContours(
-      edges,
+      dilated,
       contours,
       hierarchy,
       cv.RETR_EXTERNAL,
       cv.CHAIN_APPROX_SIMPLE
     )
-    console.log('7️⃣ Found contours:', { count: contours.size() })
 
-    // Sort contours by area
-    let contourAreas = []
-    for (let i = 0; i < Math.min(5, contours.size()); i++) {
-      let cnt = contours.get(i)
-      contourAreas.push({
-        index: i,
-        area: cv.contourArea(cnt)
-      })
-    }
-    contourAreas.sort((a, b) => b.area - a.area)
+    // Find the largest contour and try to get corners
+    let maxArea = 0
+    let largestContour = null
+    let documentCorners = null
+    const imgArea = mat.cols * mat.rows
 
-    // Find best contour with validation
-    let bestApprox = null
-    for (let i = 0; i < contourAreas.length; i++) {
-      let cnt = contours.get(contourAreas[i].index)
-      let peri = cv.arcLength(cnt, true)
-      let approx = new cv.Mat()
-      cv.approxPolyDP(cnt, approx, 0.02 * peri, true)
+    for (let i = 0; i < contours.size(); i++) {
+      const contour = contours.get(i)
+      const area = cv.contourArea(contour)
 
-      if (validateContour(approx, resized.cols, resized.rows, settings)) {
-        bestApprox = approx
-        console.log('8️⃣ Found valid document contour:', {
-          points: approx.rows,
-          perimeter: peri,
-          area: cv.contourArea(approx)
-        })
-        break
+      if (area > maxArea && area > imgArea * settings.minAreaRatio) {
+        maxArea = area
+        largestContour = contour
+
+        // Try to get corners
+        const perimeter = cv.arcLength(contour, true)
+        const approx = new cv.Mat()
+        cv.approxPolyDP(contour, approx, 0.02 * perimeter, true)
+
+        if (approx.rows === 4) {
+          const points = []
+          for (let j = 0; j < 4; j++) {
+            points.push({
+              x: approx.data32S[j * 2],
+              y: approx.data32S[j * 2 + 1]
+            })
+          }
+
+          const angleRange = calculateAngleRange(points)
+          if (angleRange < settings.maxAngleRange) {
+            documentCorners = approx
+          } else {
+            approx.delete()
+          }
+        } else {
+          approx.delete()
+        }
       }
-      approx.delete()
     }
-
-    // Perspective transform and final processing
-    let finalMat
-    if (bestApprox) {
-      console.log('9️⃣ Applying perspective transform')
-      let points = []
-      for (let i = 0; i < 4; i++) {
-        points.push({
-          x: bestApprox.data32S[i * 2] * ratio,
-          y: bestApprox.data32S[i * 2 + 1] * ratio
-        })
-      }
-      finalMat = fourPointTransform(cv, mat, sortPoints(points))
-      bestApprox.delete()
-    } else {
-      console.log('⚠️ No valid contour found, using original image')
-      finalMat = mat.clone()
-    }
-
-    // Enhanced final processing
-    cv.cvtColor(finalMat, finalMat, cv.COLOR_RGBA2GRAY)
-
-    // Apply bilateral filter before sharpening
-    let preSharpened = new cv.Mat()
-    cv.bilateralFilter(finalMat, preSharpened, 9, 75, 75)
-
-    let sharpened = sharpenImage(cv, preSharpened, settings)
-    preSharpened.delete()
 
     let result = new cv.Mat()
-    cv.adaptiveThreshold(
-      sharpened,
-      result,
-      255,
-      cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-      cv.THRESH_BINARY,
-      settings.adaptiveBlockSize,
-      settings.adaptiveC
-    )
+    if (documentCorners || largestContour) {
+      console.log('5️⃣ Found document contour')
 
-    // Apply a slight median blur to remove noise in the binary image
-    let denoised = new cv.Mat()
-    cv.medianBlur(result, denoised, 3)
-    result.delete()
-    result = denoised
+      let points = []
+      if (documentCorners) {
+        // Use the found corners
+        for (let i = 0; i < 4; i++) {
+          points.push({
+            x: documentCorners.data32S[i * 2],
+            y: documentCorners.data32S[i * 2 + 1]
+          })
+        }
+      } else {
+        // Fallback to minimum area rectangle
+        let rotatedRect = cv.minAreaRect(largestContour)
+        let vertices = cv.boxPoints(rotatedRect)
+        for (let i = 0; i < 4; i++) {
+          points.push({
+            x: vertices.data32F[i * 2],
+            y: vertices.data32F[i * 2 + 1]
+          })
+        }
+      }
 
-    console.log('🏁 Processing complete')
-    console.groupEnd()
+      // Apply perspective transform
+      const sortedPoints = sortPoints(points)
+      result = fourPointTransform(cv, enhanced, sortedPoints)
+      console.log('6️⃣ Applied perspective transform')
+
+      // Enhanced text processing pipeline
+      // 1. Apply Laplacian-based unsharp mask
+      let lap = new cv.Mat()
+      let sharp = new cv.Mat()
+      cv.Laplacian(result, lap, cv.CV_8U, 3, 1, 0, cv.BORDER_DEFAULT)
+      cv.subtract(result, lap, sharp)
+      console.log('7️⃣ Applied unsharp mask')
+
+      // 2. Enhance local contrast
+      let localContrast = new cv.Mat()
+      cv.convertScaleAbs(sharp, localContrast, 1.2, 10)
+
+      // 3. Otsu's binarization
+      let thresh = new cv.Mat()
+      cv.threshold(
+        localContrast,
+        thresh,
+        0,
+        255,
+        cv.THRESH_BINARY + cv.THRESH_OTSU
+      )
+
+      // 4. Morphological cleanup
+      let cleanKernel = cv.getStructuringElement(
+        cv.MORPH_RECT,
+        new cv.Size(2, 2)
+      )
+      let cleaned = new cv.Mat()
+
+      // Open to remove noise, then close to connect text
+      cv.morphologyEx(thresh, cleaned, cv.MORPH_OPEN, cleanKernel)
+      cv.morphologyEx(cleaned, cleaned, cv.MORPH_CLOSE, cleanKernel)
+
+      // 5. Final adaptive threshold for consistent text
+      cv.adaptiveThreshold(
+        cleaned,
+        result,
+        255,
+        cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv.THRESH_BINARY,
+        21,
+        10
+      )
+      console.log('8️⃣ Enhanced text clarity')
+
+      // Cleanup
+      lap.delete()
+      sharp.delete()
+      localContrast.delete()
+      thresh.delete()
+      cleaned.delete()
+      cleanKernel.delete()
+    } else {
+      console.log('⚠️ No document found, processing full image')
+      enhanced.copyTo(result)
+    }
 
     // Cleanup
     mat.delete()
-    resized.delete()
     gray.delete()
-    blurred.delete()
-    kernel.delete()
-    dilated.delete()
+    enhanced.delete()
+    denoised.delete()
+    preThresh.delete()
     edges.delete()
+    dilated.delete()
+    kernel.delete()
     hierarchy.delete()
-    finalMat.delete()
-    sharpened.delete()
+    if (documentCorners) documentCorners.delete()
     for (let i = 0; i < contours.size(); i++) {
       contours.get(i).delete()
     }
     contours.delete()
 
+    console.log('✅ Processing complete')
+    console.groupEnd()
     return result
   } catch (error) {
     console.error('❌ Error in OpenCV processing:', error)
     console.groupEnd()
     throw error
   }
+}
+
+function calculateAngleRange(points) {
+  // Calculate angles between vectors
+  function getAngle(p1, p2, p3) {
+    const v1 = { x: p1.x - p2.x, y: p1.y - p2.y }
+    const v2 = { x: p3.x - p2.x, y: p3.y - p2.y }
+
+    const dot = v1.x * v2.x + v1.y * v2.y
+    const mag1 = Math.hypot(v1.x, v1.y)
+    const mag2 = Math.hypot(v2.x, v2.y)
+
+    const cos = Math.max(-1, Math.min(1, dot / (mag1 * mag2)))
+    return Math.acos(cos) * (180 / Math.PI)
+  }
+
+  const [tl, tr, br, bl] = points
+  const angles = [
+    getAngle(bl, tl, tr), // top-left angle
+    getAngle(tl, tr, br), // top-right angle
+    getAngle(tr, br, bl), // bottom-right angle
+    getAngle(br, bl, tl) // bottom-left angle
+  ]
+
+  return Math.max(...angles) - Math.min(...angles)
 }

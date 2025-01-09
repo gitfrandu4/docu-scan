@@ -21,7 +21,6 @@
   "backToCamera": "Switch to camera",
   "newImage": "Upload new image",
   "uploadImage": "Upload image",
-  "toggleCamera": "Toggle camera",
   "resultTitle": "Scanned Document",
   "resultImage": "Scanned document image",
   "backToScan": "Back to scanner",
@@ -39,5 +38,31 @@
     "cannyThresholds": "Edge Sensitivity",
     "adaptiveBlockSize": "Detail Level",
     "adaptiveC": "Contrast Balance"
+  },
+  "result": {
+    "title": "Result",
+    "enhanceImage": {
+      "button": "Enhance image with AI",
+      "alreadyEnhanced": "Image already enhanced"
+    },
+    "documentType": {
+      "select": "Select document type",
+      "dni": "National ID",
+      "generic": "Generic Document"
+    },
+    "process": {
+      "button": "Process",
+      "processing": "Processing...",
+      "selectFirst": "Please select a document type before processing."
+    }
+  },
+  "ocr": {
+    "title": "OCR Results",
+    "copySuccess": "Text copied",
+    "copyError": "Error copying text",
+    "copyButton": "Copy text",
+    "fullText": "Full Text",
+    "error": "Error",
+    "processingError": "Error processing document"
   }
 }

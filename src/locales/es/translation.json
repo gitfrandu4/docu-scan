@@ -21,7 +21,6 @@
   "backToCamera": "Cambiar a cámara",
   "newImage": "Subir nueva imagen",
   "uploadImage": "Subir imagen",
-  "toggleCamera": "Alternar cámara",
   "resultTitle": "Documento Escaneado",
   "resultImage": "Imagen del documento escaneado",
   "backToScan": "Volver al escáner",
@@ -39,5 +38,31 @@
     "cannyThresholds": "Sensibilidad de Bordes",
     "adaptiveBlockSize": "Nivel de Detalle",
     "adaptiveC": "Balance de Contraste"
+  },
+  "result": {
+    "title": "Resultado",
+    "enhanceImage": {
+      "button": "Mejorar imagen con IA",
+      "alreadyEnhanced": "Imagen ya mejorada"
+    },
+    "documentType": {
+      "select": "Seleccione tipo de documento",
+      "dni": "DNI",
+      "generic": "Documento genérico"
+    },
+    "process": {
+      "button": "Procesar",
+      "processing": "Procesando...",
+      "selectFirst": "Por favor, seleccione un tipo de documento antes de procesar."
+    }
+  },
+  "ocr": {
+    "title": "Resultados OCR",
+    "copySuccess": "Texto copiado",
+    "copyError": "Error al copiar texto",
+    "copyButton": "Copiar texto",
+    "fullText": "Texto Completo",
+    "error": "Error",
+    "processingError": "Error al procesar el documento"
   }
 }
