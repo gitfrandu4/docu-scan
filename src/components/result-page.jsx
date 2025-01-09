@@ -12,7 +12,7 @@ const fieldCoordinates = [
   { name: 'Nombre', x: 623, y: 428, width: 404, height: 47 },
   { name: 'sexo', x: 619, y: 520, width: 45, height: 49 },
   { name: 'Fecha de Nacimiento', x: 1248, y: 518, width: 286, height: 52 }
-];
+]
 
 // Tamaño fijo al que se redimensionará el DNI
 const FIXED_WIDTH = 1586
@@ -21,7 +21,7 @@ const FIXED_HEIGHT = 1000
 const ResultPage = ({ croppedImage, onBack }) => {
   const { t } = useTranslation()
   const [processedImage, setProcessedImage] = useState(null)
-  const [isProcessing, setIsProcessing] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [selectedType, setSelectedType] = useState('')
   const [isEnhanced, setIsEnhanced] = useState(false)
   const enhancedCanvasRef = useRef(null)
@@ -29,6 +29,27 @@ const ResultPage = ({ croppedImage, onBack }) => {
   // New state for OCR results modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [ocrResults, setOcrResults] = useState([])
+
+  const [isOpenCVReady, setIsOpenCVReady] = useState(false)
+
+  useEffect(() => {
+    // Listen for OpenCV.js ready event
+    const handleOpenCVReady = () => {
+      console.log('✅ OpenCV.js is ready in ResultPage')
+      setIsOpenCVReady(true)
+    }
+
+    // Check if OpenCV is already ready
+    if (window.cv && typeof window.cv.imread === 'function') {
+      handleOpenCVReady()
+    } else {
+      window.addEventListener('opencv-ready', handleOpenCVReady)
+    }
+
+    return () => {
+      window.removeEventListener('opencv-ready', handleOpenCVReady)
+    }
+  }, [])
 
   // Función para redimensionar la imagen
   const resizeImage = (imageElement, targetWidth, targetHeight) => {
@@ -172,6 +193,12 @@ const ResultPage = ({ croppedImage, onBack }) => {
   }
 
   const handleEnhanceImage = () => {
+    if (!isOpenCVReady) {
+      console.error('OpenCV is not ready yet')
+      alert(t('errorProcessingImage'))
+      return
+    }
+
     try {
       const img = new Image()
       img.onload = () => {
