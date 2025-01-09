@@ -7,9 +7,12 @@ import cv from 'opencv.js'
 import OcrResultsModal from './ocr-results-modal'
 
 const fieldCoordinates = [
-  { name: 'DNI', x: 704, y: 181, width: 475, height: 73 },
-  { name: 'APELLIDOS', x: 634, y: 297, width: 541, height: 97 }
-]
+  { name: 'NumeroDNI', x: 702, y: 170, width: 492, height: 77 },
+  { name: 'Apellidos', x: 629, y: 286, width: 441, height: 99 },
+  { name: 'Nombre', x: 623, y: 428, width: 404, height: 47 },
+  { name: 'sexo', x: 619, y: 520, width: 45, height: 49 },
+  { name: 'Fecha de Nacimiento', x: 1248, y: 518, width: 286, height: 52 }
+];
 
 // Tamaño fijo al que se redimensionará el DNI
 const FIXED_WIDTH = 1586
