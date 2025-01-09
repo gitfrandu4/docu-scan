@@ -2,13 +2,6 @@
 
 Proyecto final para la asignatura de Visión por Computador de la Universidad de Las Palmas de Gran Canaria (ULPGC) en el Grado de Ingeniería Informática.
 
-<p align="center">
-  <img src="./sample.png" />
-</p>
-
-![love](https://img.shields.io/badge/Made%20with-🖤-white)
-![tensorflow.js](https://img.shields.io/badge/tensorflow.js-white?logo=tensorflow)
-
 ## Descripción del Proyecto
 
 Este proyecto aborda la necesidad de mejorar la calidad de las fotografías de documentos tomadas por conductores de una empresa de transporte. Implementa una aplicación web que escanea documentos utilizando diversas tecnologías de visión por computador estudiadas durante el curso.
