@@ -24,6 +24,7 @@ const ResultPage = ({ croppedImage, onBack }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [selectedType, setSelectedType] = useState('')
   const [isEnhanced, setIsEnhanced] = useState(false)
+  const [enhanceError, setEnhanceError] = useState(null)
   const enhancedCanvasRef = useRef(null)
 
   // New state for OCR results modal
@@ -192,58 +193,97 @@ const ResultPage = ({ croppedImage, onBack }) => {
     document.body.removeChild(link)
   }
 
-  const handleEnhanceImage = () => {
+  const handleEnhanceImage = async () => {
     if (!isOpenCVReady) {
       console.error('OpenCV is not ready yet')
       alert(t('errorProcessingImage'))
       return
     }
 
+    setIsProcessing(true)
+    setEnhanceError(null)
+
     try {
       const img = new Image()
-      img.onload = () => {
-        // Calcular las dimensiones manteniendo la proporción
-        let displayWidth, displayHeight
-        const aspectRatio = img.width / img.height
 
-        if (aspectRatio > 1) {
-          // Imagen más ancha que alta
-          displayWidth = Math.min(img.width, FIXED_WIDTH)
-          displayHeight = displayWidth / aspectRatio
-        } else {
-          // Imagen más alta que ancha
-          displayHeight = Math.min(img.height, FIXED_HEIGHT)
-          displayWidth = displayHeight * aspectRatio
+      img.onload = async () => {
+        try {
+          // Calculate dimensions with a maximum size to prevent memory issues
+          const MAX_DIMENSION = 1500
+          let displayWidth, displayHeight
+          const aspectRatio = img.width / img.height
+
+          if (aspectRatio > 1) {
+            displayWidth = Math.min(img.width, MAX_DIMENSION)
+            displayHeight = displayWidth / aspectRatio
+          } else {
+            displayHeight = Math.min(img.height, MAX_DIMENSION)
+            displayWidth = displayHeight * aspectRatio
+          }
+
+          // Create the canvas with the calculated dimensions
+          const displayCanvas = document.createElement('canvas')
+          displayCanvas.width = displayWidth
+          displayCanvas.height = displayHeight
+
+          const ctx = displayCanvas.getContext('2d', {
+            willReadFrequently: true,
+            alpha: false
+          })
+          ctx.drawImage(img, 0, 0, displayWidth, displayHeight)
+
+          // Process the image with lower quality settings for mobile
+          const isMobile = window.innerWidth <= 768
+          const processedMat = processImage(window.cv, displayCanvas, {
+            minAreaRatio: isMobile ? 0.15 : 0.25,
+            maxAngleRange: isMobile ? 30 : 40,
+            gaussianBlurSize: isMobile ? 3 : 5
+          })
+
+          // Store the enhanced canvas
+          enhancedCanvasRef.current = document.createElement('canvas')
+          enhancedCanvasRef.current.width = displayWidth
+          enhancedCanvasRef.current.height = displayHeight
+
+          // Use requestAnimationFrame to prevent UI blocking
+          requestAnimationFrame(() => {
+            try {
+              cv.imshow(enhancedCanvasRef.current, processedMat)
+              processedMat.delete()
+
+              // Update the image display
+              setProcessedImage(
+                enhancedCanvasRef.current.toDataURL(
+                  'image/png',
+                  isMobile ? 0.8 : 1.0
+                )
+              )
+              setIsEnhanced(true)
+              setIsProcessing(false)
+            } catch (error) {
+              console.error('Error in final image processing:', error)
+              setEnhanceError(t('errorProcessingImage'))
+              setIsProcessing(false)
+            }
+          })
+        } catch (error) {
+          console.error('Error during enhancement:', error)
+          setEnhanceError(t('errorProcessingImage'))
+          setIsProcessing(false)
         }
-
-        // Crear el canvas con las dimensiones proporcionales
-        const displayCanvas = document.createElement('canvas')
-        displayCanvas.width = displayWidth
-        displayCanvas.height = displayHeight
-
-        const ctx = displayCanvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, displayWidth, displayHeight)
-
-        const processedMat = processImage(window.cv, displayCanvas, {
-          minAreaRatio: 0.25,
-          maxAngleRange: 40
-        })
-
-        // Store the enhanced canvas with the correct dimensions
-        enhancedCanvasRef.current = document.createElement('canvas')
-        enhancedCanvasRef.current.width = displayWidth
-        enhancedCanvasRef.current.height = displayHeight
-        cv.imshow(enhancedCanvasRef.current, processedMat)
-        processedMat.delete()
-
-        // Update the image display
-        setProcessedImage(enhancedCanvasRef.current.toDataURL('image/png'))
-        setIsEnhanced(true)
       }
+
+      img.onerror = () => {
+        console.error('Error loading image')
+        setEnhanceError(t('errorProcessingImage'))
+        setIsProcessing(false)
+      }
+
       img.src = processedImage || croppedImage
     } catch (error) {
-      console.error('Error enhancing image:', error)
-      alert('Error al mejorar la imagen. Por favor, inténtelo de nuevo.')
+      console.error('Error in enhancement process:', error)
+      setEnhanceError(t('errorProcessingImage'))
+      setIsProcessing(false)
     }
   }
 
@@ -268,16 +308,27 @@ const ResultPage = ({ croppedImage, onBack }) => {
           <div className="controls-group">
             <button
               onClick={handleEnhanceImage}
-              className={`enhance-button ${isEnhanced ? 'enhanced' : ''}`}
-              disabled={isEnhanced}
+              className={`enhance-button ${isEnhanced ? 'enhanced' : ''} ${
+                isProcessing ? 'processing' : ''
+              }`}
+              disabled={isEnhanced || isProcessing}
               title={
                 isEnhanced
                   ? t('result.enhanceImage.alreadyEnhanced')
+                  : isProcessing
+                  ? t('processingImage')
                   : t('result.enhanceImage.button')
               }
             >
-              <MdAutoFixHigh size={20} />
+              {isProcessing ? (
+                <div className="spinner"></div>
+              ) : (
+                <MdAutoFixHigh size={20} />
+              )}
             </button>
+            {enhanceError && (
+              <div className="error-message">{enhanceError}</div>
+            )}
             <div className="separator-vertical" />
             <select
               value={selectedType}
