@@ -151,7 +151,7 @@ El proyecto utiliza un modelo YOLOv11n convertido a formato TensorFlow.js:
 
 ## Créditos
 
-Este proyecto se basa en el repositorio [yolov11-tfjs](https://github.com/Hyuto/yolov11-tfjs) de Hyuto, que proporcionó la implementación crucial de inferencia con TensorFlow.js. El repositorio original ha sido extendido con técnicas adicionales de visión por computador y capacidades de procesamiento de documentos.
+Este proyecto parte de [yolov8-tfjs](https://github.com/Hyuto/yolov8-tfjs) de Hyuto, que proporcionó la implementación de inferencia con TensorFlow.js. El repositorio original ha sido extendido con técnicas adicionales de visión por computador y capacidades de procesamiento de documentos.
 
 ## Mejoras Futuras
 
